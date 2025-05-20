@@ -169,18 +169,8 @@ const sidebarItem: menu[] = [
         to: '/app/user/account-profile',
         children: [
           {
-            id: 'profile01',
-            title: 'Profile 01',
-            to: '/app/user/account-profile/profile1'
-          },
-          {
-            id: 'profile02',
-            title: 'Profile 02',
-            to: '/app/user/account-profile/profile2'
-          },
-          {
             id: 'profile03',
-            title: 'Profile 03',
+            title: 'Profile',
             to: '/app/user/account-profile/profile3'
           }
         ]

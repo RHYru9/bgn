@@ -1,36 +1,47 @@
+// src/stores/auth.ts
 import { defineStore } from 'pinia';
+import axios from 'axios';
 import { router } from '@/router';
-import { fetchWrapper } from '@/utils/helpers/fetch-wrapper';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
-
-export const useAuthStore = defineStore({
-  id: 'auth',
+export const useAuthStore = defineStore('auth', {
   state: () => ({
-    // initialize state from local storage to enable user to stay logged in
-    /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-    // @ts-ignore
-    user: JSON.parse(localStorage.getItem('user')),
-    returnUrl: null
+    user: JSON.parse(localStorage.getItem('user') || 'null') as any,
+    token: localStorage.getItem('token') as string | null,
+    returnUrl: null as string | null,
   }),
   actions: {
     async login(email: string, password: string) {
-      const user = await fetchWrapper.post(`${baseUrl}/authenticate`, { email, password });
+      try {
+        const response = await axios.post('/api/auth/login', {
+          email,
+          password,
+        });
 
-      // if you want to use actual api then uncomment below code & comment above code
-      // const user = await fetchWrapper.post(`${import.meta.env.VITE_API_URL}/api/account/login`, { email, password });
+        const { access_token, user } = response.data.data;
 
-      // update pinia state
-      this.user = user;
-      // store user details and jwt in local storage to keep user logged in between page refreshes
-      localStorage.setItem('user', JSON.stringify(user));
-      // redirect to previous url or default to home page
-      router.push(this.returnUrl || '/dashboard/default');
+        this.token = access_token;
+        this.user = user;
+
+        localStorage.setItem('token', access_token);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+
+        // Arahkan ke returnUrl atau dashboard default
+        router.push(this.returnUrl || '/dashboard/default');
+      } catch (error: any) {
+        const message = error.response?.data?.message || 'Login gagal';
+        throw message;
+      }
     },
+
     logout() {
       this.user = null;
+      this.token = null;
       localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
       router.push('/login');
-    }
-  }
+    },
+  },
 });

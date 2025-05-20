@@ -1,3 +1,4 @@
+// src/utils/helpers/fetch-wrapper.ts
 import { useAuthStore } from '@/stores/auth';
 
 export const fetchWrapper = {
@@ -7,61 +8,62 @@ export const fetchWrapper = {
   delete: request('DELETE')
 };
 
-interface temp {
+interface RequestOptions {
   method: string;
   headers: Record<string, string>;
   body?: string;
 }
 
-interface UserData {
-  username: string;
-  password: string;
-}
-
 function request(method: string) {
-  return (url: string, body?: object) => {
-    const requestOptions: temp = {
+  return async (url: string, body?: object) => {
+    const headers = getAuthHeader(url);
+
+    const requestOptions: RequestOptions = {
       method,
-      headers: authHeader(url)
+      headers
     };
+
     if (body) {
       requestOptions.headers['Content-Type'] = 'application/json';
       requestOptions.body = JSON.stringify(body);
     }
-    return fetch(url, requestOptions).then(handleResponse);
+
+    const response = await fetch(url, requestOptions);
+    return handleResponse(response);
   };
 }
 
-// helper functions
+// Auth Header helper
+function getAuthHeader(url: string): Record<string, string> {
+  try {
+    const authStore = useAuthStore();
+    const token = authStore.token;
+    const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
 
-function authHeader(url: string): Record<string, string> {
-  // return auth header with jwt if user is logged in and request is to the api url
-  const { user } = useAuthStore();
-  const isLoggedIn = !!user?.token;
-  const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
-  if (isLoggedIn && isApiUrl) {
-    return { Authorization: `Bearer ${user.token}` };
-  } else {
-    return {};
+    if (token && isApiUrl) {
+      return { Authorization: `Bearer ${token}` };
+    }
+  } catch (e) {
   }
+  return {};
 }
 
-function handleResponse(response: Response): Promise<UserData> {
+function handleResponse<T = any>(response: Response): Promise<T> {
   return response.text().then((text: string) => {
-    const data = text && JSON.parse(text);
+    const json = text ? JSON.parse(text) : null;
 
     if (!response.ok) {
-      const { user, logout } = useAuthStore();
-      if ([401, 403].includes(response.status) && user) {
-        // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-        logout();
+      const authStore = useAuthStore();
+
+      if ([401, 403].includes(response.status) && authStore.user) {
+        authStore.logout();
       }
 
-      const error: string = (data && data.message) || response.statusText;
+      const error: string = json?.message || response.statusText;
       return Promise.reject(error);
     }
 
-    // Ensure data is of type UserData
-    return data as UserData;
+    // Return 'data' property dari API response
+    return json?.data;
   });
 }

@@ -1,6 +1,11 @@
 <script setup lang="ts">
-// assets
 import Banner from '@/assets/images/analytics/welcome-banner.png';
+import { useAuthStore } from '@/stores/auth';
+import { computed } from 'vue';
+
+const authStore = useAuthStore();
+
+const userName = computed(() => authStore.user?.nama || 'Admin');
 </script>
 
 <template>
@@ -9,11 +14,11 @@ import Banner from '@/assets/images/analytics/welcome-banner.png';
       <v-row>
         <v-col cols="12" xl="6" md="7" sm="10">
           <div class="pb-md-8 pt-md-7 pt-5 pb-6">
-            <h2 class="text-sm-h2 text-h3">Selamat Datang, Admin!</h2>
+            <h2 class="text-sm-h2 text-h3">Selamat Datang, {{ userName }}!</h2>
             <p class="text-h6 mb-7">
               Kelola data pengguna, pantau transaksi, dan awasi pengiriman dengan mudah dari dashboard ini.
             </p>
-            <v-btn color="white" variant="outlined" rounded="md" to="/dashboard">Mulai Kelola Sistem</v-btn>
+            <v-btn color="white" variant="outlined" rounded="md" to="/dashboard/default">Mulai Kelola Sistem</v-btn>
           </div>
         </v-col>
         <v-col cols="12" xl="6" md="5" class="d-md-block d-none">

@@ -36,11 +36,11 @@ const searchField = ref('name');
 const searchValue = ref('');
 
 const headers: Header[] = [
-  { text: 'Customer name', value: 'name', sortable: true },
-  { text: 'Contact', value: 'date', sortable: true },
-  { text: 'Age', value: 'orders', sortable: true },
-  { text: 'Country', value: 'location', sortable: true },
-  { text: 'Status', value: 'status', sortable: true },
+  { text: 'Nama User', value: 'name', sortable: true },
+  { text: 'No Hp', value: 'no_hp', sortable: true },
+  { text: 'Alamat', value: 'alamat', sortable: true },
+  { text: 'Country', value: 'kode_pos', sortable: true },
+  { text: 'role', value: 'role', sortable: true },
   { text: 'Action', value: 'operation' }
 ];
 const items = ref(getCustomers);
@@ -50,6 +50,30 @@ const { deleteCustomer } = store;
 const itemsSelected = ref<Item[]>([]);
 
 const dialog = ref(false);
+
+// Add confirmation dialog for delete
+const deleteConfirmDialog = ref(false);
+const customerToDelete = ref<number | null>(null);
+
+const confirmDelete = async () => {
+  if (customerToDelete.value !== null) {
+    try {
+      await deleteCustomer(customerToDelete.value);
+      // Show success notification or handle success case
+    } catch (error) {
+      // Handle error case
+      console.error('Failed to delete customer:', error);
+    } finally {
+      deleteConfirmDialog.value = false;
+      customerToDelete.value = null;
+    }
+  }
+};
+
+const openDeleteDialog = (id: number) => {
+  customerToDelete.value = id;
+  deleteConfirmDialog.value = true;
+};
 </script>
 
 <template>
@@ -218,9 +242,9 @@ const dialog = ref(false);
             :rows-per-page="10"
             v-model:items-selected="itemsSelected"
           >
-            <template #item-name="{ name, email }">
+            <template #item-name="{ nama, email }">
               <div class="player-wrapper">
-                <h6 class="text-subtitle-1 mb-0">{{ name }}</h6>
+                <h6 class="text-subtitle-1 mb-0">{{ nama }}</h6>
                 <small class="text-h6 text-lightText">{{ email }}</small>
               </div>
             </template>
@@ -237,7 +261,7 @@ const dialog = ref(false);
                 <v-btn icon color="primary" aria-label="edit" variant="text" rounded="md">
                   <SvgSprite name="custom-edit-outline" style="width: 20px; height: 20px" />
                 </v-btn>
-                <v-btn icon color="error" aria-label="trash" variant="text" @click="deleteCustomer(item.name)" rounded="md">
+                <v-btn icon color="error" aria-label="trash" variant="text" @click="openDeleteDialog(item.id)" rounded="md">
                   <SvgSprite name="custom-trash" style="width: 20px; height: 20px" />
                 </v-btn>
               </div>
@@ -247,7 +271,29 @@ const dialog = ref(false);
       </v-card>
     </v-col>
   </v-row>
+
+  <!-- Delete Confirmation Dialog -->
+  <v-dialog v-model="deleteConfirmDialog" max-width="400">
+    <v-card>
+      <v-card-title class="text-h5">
+        Confirm Delete
+      </v-card-title>
+      <v-card-text>
+        Are you sure you want to delete this customer? This action cannot be undone.
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="secondary" variant="text" @click="deleteConfirmDialog = false">
+          Cancel
+        </v-btn>
+        <v-btn color="error" variant="flat" @click="confirmDelete">
+          Delete
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
+
 <style lang="scss">
 .customer-modal {
   width: calc(100% - 48px);

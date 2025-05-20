@@ -1,88 +1,83 @@
 import { defineStore } from 'pinia';
-// project imports
-import axios from '@/utils/axios';
-// types
-import type { CustomerStateProps } from '@/types/customers/index';
+import axios from 'axios';
 
-export const useCustomers = defineStore({
-  id: 'customers',
-  state: (): CustomerStateProps => ({
-    customers: [],
-    orders: [],
-    products: [],
-    productreviews: []
-  }),
-  getters: {
-    // Get Customers from Getters
-    getCustomers(state) {
-      return state.customers;
+export const useCustomers = defineStore('customers', {
+    state: () => ({
+        customers: [] as any[],
+        loading: false,
+        error: null as string | null
+    }),
+
+    actions: {
+        async fetchCustomers() {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) throw new Error('Token tidak ditemukan');
+
+                const res = await axios.get('http://localhost:8000/api/users', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (res.data && res.data.data) {
+                    this.customers = res.data.data;
+                } else {
+                    throw new Error('Format respons tidak valid');
+                }
+            } catch (error: any) {
+                console.error('Gagal mengambil data:', error);
+                this.error = error.response?.data?.message || error.message || 'Gagal mengambil data';
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async deleteCustomer(id: number) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) throw new Error('Token tidak ditemukan');
+
+                const response = await axios.delete(`http://localhost:8000/api/users/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                // Periksa jika penghapusan berhasil
+                if (response.status === 200) {
+                    // Hapus dari state lokal
+                    this.customers = this.customers.filter(customer => customer.id !== id);
+                    return response.data?.message || 'User berhasil dihapus';
+                }
+                throw new Error('Gagal menghapus user');
+            } catch (error: any) {
+                console.error('Error menghapus user:', error);
+                
+                let errorMessage = 'Gagal menghapus user';
+                if (error.response) {
+                    // Handle error spesifik dari API
+                    if (error.response.status === 404) {
+                        errorMessage = 'User tidak ditemukan';
+                    } else if (error.response.status === 400) {
+                        errorMessage = error.response.data.message || 'Tidak dapat menghapus akun admin sendiri';
+                    } else if (error.response.data?.message) {
+                        errorMessage = error.response.data.message;
+                    }
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                throw new Error(errorMessage);
+            }
+        }
     },
-    // Get orders from Getters
-    getOrders(state) {
-      return state.orders;
-    },
-    // Get orders from Getters
-    getProducts(state) {
-      return state.products;
-    },
-    // Get orders from Getters
-    getProductsreviews(state) {
-      return state.productreviews;
+
+    getters: {
+        getCustomers: (state) => state.customers
     }
-  },
-  actions: {
-    // Fetch Customers from action
-    async fetchCustomers() {
-      try {
-        const data = await axios.get('/api/data/customers');
-        this.customers = data.data;
-      } catch (error) {
-        alert(error);
-      }
-    },
-
-    // Fetch Orders from action
-    async fetchOrders() {
-      try {
-        const data = await axios.get('/api/data/orders');
-        this.orders = data.data;
-      } catch (error) {
-        alert(error);
-      }
-    },
-
-    // Fetch products from action
-    async fetchProducts() {
-      try {
-        const data = await axios.get('/api/data/products');
-        this.products = data.data;
-      } catch (error) {
-        alert(error);
-      }
-    },
-
-    // Fetch products from action
-    async fetchReviews() {
-      try {
-        const data = await axios.get('/api/data/productreviews');
-        this.productreviews = data.data;
-      } catch (error) {
-        alert(error);
-      }
-    },
-
-    // Delete Customer
-    deleteCustomer(itemId: string) {
-      this.customers = this.customers.filter((object) => {
-        return object.name !== itemId;
-      });
-    },
-
-    // Delete Orders
-    deleteOrder(itemId: string) {
-      this.orders = this.orders.filter((object) => {
-        return object.id !== itemId;
-      });
-    }
-  }
 });

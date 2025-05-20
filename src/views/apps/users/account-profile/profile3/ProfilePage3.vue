@@ -10,7 +10,7 @@ import SecurityTab from './SecurityTab.vue';
 import NotificationsTab from './NotificationsTab.vue';
 
 // theme breadcrumb
-const page = ref({ title: 'Profile 03' });
+const page = ref({ title: 'Profile' });
 const breadcrumbs = ref([
   {
     title: 'Users',
@@ -23,7 +23,7 @@ const breadcrumbs = ref([
     href: '#'
   },
   {
-    title: 'Profile 03',
+    title: 'Profile',
     disabled: true,
     href: '#'
   }
