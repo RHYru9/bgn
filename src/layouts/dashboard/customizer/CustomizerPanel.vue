@@ -182,8 +182,7 @@ watch(
 );
 
 function clearoptions() {
-  customizer.actTheme = 'light';
-  customizer.isHorizontalLayout = false;
+  customizer.actTheme = 'Dark';
   customizer.inputBg = false;
   customizer.themeContrast = false;
   customizer.boxed = false;
@@ -297,18 +296,6 @@ function clearoptions() {
               <!------------------------------------->
               <!-- end Theme contrast -->
               <!------------------------------------->
-              <h6 class="text-subtitle-1 mb-0 mt-5">Menu Orientation</h6>
-              <p class="text-caption mb-0">Choose Vertical or Horizontal Menu Orientation</p>
-              <!-- sidebar layout -->
-              <v-radio-group class="custom-radio-with-label mx-n2 mt-2 mb-3" v-model="customizer.isHorizontalLayout" hide-details>
-                <v-radio :value="false" color="primary" class="ma-2 text-center" label="Vertical">
-                  <img src="@/assets/images/customizer/vertical.svg" alt="menu layout" />
-                </v-radio>
-                <v-radio :value="true" color="primary" class="ma-2 text-center" label="Horizontal">
-                  <img src="@/assets/images/customizer/horizontal.svg" alt="menu layout" />
-                </v-radio>
-              </v-radio-group>
-              <v-divider />
               <!------------------------------------->
               <!-- Preset color -->
               <!------------------------------------->

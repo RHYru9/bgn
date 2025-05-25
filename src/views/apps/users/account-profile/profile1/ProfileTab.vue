@@ -3,20 +3,20 @@ import { shallowRef } from 'vue';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
 
 const items = shallowRef([
-  { text: 'anshan.dh81@gmail.com', icon: 'custom-mail-outline', color: 'dark' },
+  { text: 'rhyru9@gmail.com', icon: 'custom-mail-outline', color: 'dark' },
   { text: '(+1-876) 8654 239 581', icon: 'custom-phone-outline-1', color: 'dark' },
   { text: 'New York', icon: 'custom-goal-outline', color: 'dark' },
-  { text: 'https://anshan.dh.url', icon: 'custom-link1', color: 'primary link-hover' }
+  { text: 'https://github.com/rhyru9', icon: 'custom-link1', color: 'primary link-hover' }
 ]);
 
 const details = shallowRef([
   {
     title: 'Full Name',
-    subtext: 'Anshan Handgun'
+    subtext: 'ss sss'
   },
   {
     title: 'Father Name',
-    subtext: 'Mr. Deepen Handgun'
+    subtext: 'Mr. sss sss'
   },
   {
     title: 'Phone',
@@ -28,7 +28,7 @@ const details = shallowRef([
   },
   {
     title: 'Email',
-    subtext: 'anshan.dh81@gmail.com'
+    subtext: 's.ss@gmail.com'
   },
   {
     title: 'Zip Code',

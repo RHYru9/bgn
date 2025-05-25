@@ -1,14 +1,18 @@
-import { type ThemeDefinition, createVuetify } from 'vuetify';
+// plugins/vuetify.ts
+import { createVuetify, type ThemeDefinition } from 'vuetify';
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
-import { icons } from './mdi-icon'; // Import icons from separate file
+import { icons } from './mdi-icon'; // custom icons
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
+import 'vuetify/styles'; // pastikan ini diimpor
 
+// Warna utama
 export const PrimaryColor = '#4680FF';
 export const PrimaryDarkColor = '#3F78FF';
 export const PrimaryLightColor = '#E9F0FF';
 export const PrimaryLightColorForDark = '#18243e';
 
+// Tema terang
 const light: ThemeDefinition = {
   dark: false,
   colors: {
@@ -59,6 +63,7 @@ const light: ThemeDefinition = {
   }
 };
 
+// Tema gelap
 const dark: ThemeDefinition = {
   dark: true,
   colors: {
@@ -108,6 +113,7 @@ const dark: ThemeDefinition = {
   }
 };
 
+// Inisialisasi Vuetify
 export default createVuetify({
   components,
   directives,
@@ -122,7 +128,7 @@ export default createVuetify({
     }
   },
   theme: {
-    defaultTheme: 'light',
+    defaultTheme: 'dark', // 👈 Inilah pengaturan default dark
     themes: {
       light,
       dark
@@ -137,7 +143,6 @@ export default createVuetify({
       rounded: 'lg'
     },
     VTooltip: {
-      // set v-tooltip default location to top
       location: 'top'
     }
   }

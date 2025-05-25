@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
-import Products from '@/components/apps/ecommrece/listing/ProductList.vue';
+import Products from '@/components/apps/ecommerce/listing/ProductList.vue';
 
 const page = ref({ title: 'Products' });
 const breadcrumbs = ref([
@@ -12,7 +12,7 @@ const breadcrumbs = ref([
     href: '#'
   },
   {
-    title: 'product Page',
+    title: 'Halaman Produk',
     disabled: true,
     href: '#'
   }

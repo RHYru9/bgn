@@ -46,6 +46,7 @@ const filters = ref({
 
 // Table headers
 const headers: Header[] = [
+  { text: 'ID', value: 'id', sortable: true },
   { text: 'Nama User', value: 'nama', sortable: true },
   { text: 'Email', value: 'email', sortable: true },
   { text: 'No HP', value: 'no_hp', sortable: true },
@@ -254,7 +255,7 @@ const saveEditedCustomer = async () => {
                   style="min-width: 200px; flex-grow: 1; max-width: 300px"
                   @keyup.esc="searchTerm = ''"
                 ></v-text-field>
-                
+
                 <v-btn
                   variant="text"
                   color="secondary"

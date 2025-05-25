@@ -157,11 +157,6 @@ const MainRoutes = {
       component: () => import('@/views/apps/customer/OrderList.vue')
     },
     {
-      name: 'ProductList',
-      path: '/customer/productlist',
-      component: () => import('@/views/apps/customer/ProductList.vue')
-    },
-    {
       name: 'ProductReview',
       path: '/customer/productreview',
       component: () => import('@/views/apps/customer/ProductReviews.vue')
@@ -177,9 +172,8 @@ const MainRoutes = {
       component: () => import('@/views/apps/customer/order-details/OrderDetailPage.vue')
     },
     {
-      name: 'Chats',
-      path: '/app/chats',
-      component: () => import('@/views/apps/chats/ChatPage.vue')
+      path: '/ecommerce/kategori/list',
+      component: () => import('@/views/apps/kategori/listkategori.vue'),
     },
     {
       name: 'Invoice dashboard',
@@ -195,11 +189,6 @@ const MainRoutes = {
       name: 'Invoice create',
       path: '/app/invoice/create',
       component: () => import('@/views/apps/invoice/CreatePage.vue')
-    },
-    {
-      name: 'Invoice lists',
-      path: '/app/invoice/list',
-      component: () => import('@/views/apps/invoice/ListPage.vue')
     },
     {
       name: 'Invoice Edit',
@@ -252,56 +241,6 @@ const MainRoutes = {
       component: () => import('@/views/apps/users/account-profile/profile3/ProfilePage3.vue')
     },
     {
-      name: 'Style 01',
-      path: '/app/user/card/card1',
-      component: () => import('@/views/apps/users/card/CardStyle1.vue')
-    },
-    {
-      name: 'Style 02',
-      path: '/app/user/card/card2',
-      component: () => import('@/views/apps/users/card/CardStyle2.vue')
-    },
-    {
-      name: 'Style 03',
-      path: '/app/user/card/card3',
-      component: () => import('@/views/apps/users/card/CardStyle3.vue')
-    },
-    {
-      name: 'List',
-      path: '/app/user/list1',
-      component: () => import('@/views/apps/users/list/ListPage1.vue')
-    },
-    {
-      name: 'List2',
-      path: '/app/user/list2',
-      component: () => import('@/views/apps/users/list/ListPage2.vue')
-    },
-    {
-      name: 'Contact List',
-      path: '/app/contact/c-list',
-      component: () => import('@/views/apps/contacts/ListPage.vue')
-    },
-    {
-      name: 'Contact Card',
-      path: '/app/contact/c-card',
-      component: () => import('@/views/apps/contacts/CardPage.vue')
-    },
-    {
-      name: 'Mail',
-      path: '/app/mail',
-      component: () => import('@/views/apps/mail/MailPage.vue')
-    },
-    {
-      name: 'Kanban',
-      path: '/app/kanban',
-      component: () => import('@/views/apps/kanban/KanbanPage.vue')
-    },
-    {
-      name: 'Calendar',
-      path: '/app/calendar',
-      component: () => import('@/views/apps/calendar/CalendarPage.vue')
-    },
-    {
       name: 'ecom Products',
       path: '/ecommerce/products',
       component: () => import('@/views/apps/eCommerce/ProductPage.vue')
@@ -312,9 +251,9 @@ const MainRoutes = {
       component: () => import('@/views/apps/eCommerce/AddProduct.vue')
     },
     {
-      name: 'Product detail',
-      path: '/ecommerce/product/detail/:id',
-      component: () => import('@/views/apps/eCommerce/ProductDetails.vue')
+      path: '/barang/:id',
+      name: 'ProductDetails',
+      component: () => import('@/views/apps/ecommerce/ProductDetails.vue')
     },
     {
       name: 'Product Checkout',
@@ -325,7 +264,17 @@ const MainRoutes = {
       name: 'Product Listing',
       path: '/ecommerce/productlist',
       component: () => import('@/views/apps/eCommerce/ProductList.vue')
-    }
+    },
+    {
+      name: 'Supplier',
+      path: '/ecommerce/supplier',
+      component: () => import('@/views/apps/eCommerce/Supplier.vue')
+    },
+    {
+      path: '/ecommerce/supplier/add',
+      name: 'AddSupplier',
+      component: () => import('@/views/apps/eCommerce/AddSupplier.vue')
+  },
   ]
 };
 

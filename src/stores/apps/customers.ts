@@ -14,15 +14,60 @@ interface Customer {
   updated_at: string;
 }
 
+interface Transaction {
+  id: number;
+  kode_transaksi: string;
+  user_id: number;
+  tanggal_pesanan: string;
+  total_harga: string;
+  status_pembayaran: string;
+  status_pengiriman: string;
+  jenis_pengiriman: string;
+  metode_pembayaran: string;
+  tanggal_jatuh_tempo: string;
+  alamat_pengiriman: string;
+  kode_pos: string;
+  catatan_pembeli: string;
+  created_at: string;
+  updated_at: string;
+  user?: Customer;
+}
+
+interface TransactionCreate {
+  user_id: number;
+  tanggal_pesanan: string;
+  total_harga: number;
+  status_pembayaran: string;
+  status_pengiriman: string;
+  jenis_pengiriman: string;
+  metode_pembayaran: string;
+  tanggal_jatuh_tempo: string;
+  alamat_pengiriman: string;
+  kode_pos: string;
+  catatan_pembeli: string;
+}
+
+interface TransactionUpdate {
+  status_pembayaran?: string;
+  status_pengiriman?: string;
+  tanggal_jatuh_tempo?: string;
+  alamat_pengiriman?: string;
+  kode_pos?: string;
+  catatan_pembeli?: string;
+}
+
 export const useCustomers = defineStore('customers', {
   state: () => ({
     customers: [] as Customer[],
     currentCustomer: null as Customer | null,
+    transactions: [] as Transaction[],
+    currentTransaction: null as Transaction | null,
     loading: false,
     error: null as string | null
   }),
 
   actions: {
+    // Customer management methods
     async fetchCustomers() {
       this.loading = true;
       this.error = null;
@@ -155,10 +200,162 @@ export const useCustomers = defineStore('customers', {
       } finally {
         this.loading = false;
       }
-    }
+    },
+
+    // Transaction management methods
+    async fetchTransactions() {
+      try {
+        this.loading = true;
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token tidak ditemukan');
+
+        const response = await axios.get('http://localhost:8000/api/transaksi', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        // API returns either array directly or data property with array
+        this.transactions = Array.isArray(response.data) ? response.data : (response.data.data || []);
+        this.loading = false;
+      } catch (error: any) {
+        this.loading = false;
+        this.error = error.response?.data?.message || error.message || 'Gagal mengambil data transaksi';
+        console.error('Error fetching transactions:', error);
+        throw error;
+      }
+    },
+    
+    async createTransaction(data: TransactionCreate) {
+      try {
+        this.loading = true;
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token tidak ditemukan');
+
+        const response = await axios.post('http://localhost:8000/api/transaksi', data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const newTransaction = response.data.data;
+        
+        // Add to local state if successful
+        if (newTransaction && newTransaction.id) {
+          this.transactions.push(newTransaction);
+        }
+        
+        this.loading = false;
+        return response.data;
+      } catch (error: any) {
+        this.loading = false;
+        this.error = error.response?.data?.message || error.message || 'Gagal membuat transaksi';
+        console.error('Error creating transaction:', error);
+        throw error;
+      }
+    },
+    
+    async deleteTransaction(id: number) {
+      try {
+        this.loading = true;
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token tidak ditemukan');
+
+        await axios.delete(`http://localhost:8000/api/transaksi/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        // Remove the deleted transaction from the state
+        this.transactions = this.transactions.filter(item => item.id !== id);
+        this.loading = false;
+        return 'Transaksi berhasil dihapus';
+      } catch (error: any) {
+        this.loading = false;
+        this.error = error.response?.data?.message || error.message || 'Gagal menghapus transaksi';
+        console.error('Error deleting transaction:', error);
+        throw error;
+      }
+    },
+    
+    async getTransactionById(id: number) {
+      try {
+        this.loading = true;
+        this.error = null;
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token tidak ditemukan');
+
+        const response = await axios.get(`http://localhost:8000/api/transaksi/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        // Store the current transaction
+        this.currentTransaction = response.data.data || response.data;
+        
+        this.loading = false;
+        return this.currentTransaction;
+      } catch (error: any) {
+        this.loading = false;
+        this.error = error.response?.data?.message || error.message || `Gagal mengambil transaksi #${id}`;
+        console.error(`Error fetching transaction #${id}:`, error);
+        throw error;
+      }
+    },
+    
+    async updateTransaction(id: number, data: TransactionUpdate) {
+      try {
+        this.loading = true;
+        this.error = null;
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token tidak ditemukan');
+
+        const response = await axios.put(`http://localhost:8000/api/transaksi/${id}`, data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const updatedTransaction = response.data.data;
+        
+        // Update both transactions list and current transaction in state
+        if (updatedTransaction) {
+          // Update in transactions array
+          const index = this.transactions.findIndex(item => item.id === id);
+          if (index !== -1) {
+            this.transactions[index] = { 
+              ...this.transactions[index], 
+              ...updatedTransaction
+            };
+          }
+          
+          // Update currentTransaction if it's the one being updated
+          if (this.currentTransaction && this.currentTransaction.id === id) {
+            this.currentTransaction = {
+              ...this.currentTransaction,
+              ...updatedTransaction
+            };
+          }
+        }
+        
+        this.loading = false;
+        return response.data;
+      } catch (error: any) {
+        this.loading = false;
+        this.error = error.response?.data?.message || error.message || `Gagal memperbarui transaksi #${id}`;
+        console.error(`Error updating transaction #${id}:`, error);
+        throw error;
+      }
+    },
   },
 
   getters: {
-    getCustomers: (state) => state.customers
+    getCustomers: (state) => state.customers,
+    getTransactions: (state) => state.transactions,
+    getCurrentTransaction: (state) => state.currentTransaction
   }
 });
