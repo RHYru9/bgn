@@ -1,37 +1,25 @@
-<script setup>
+<script setup lang="ts">
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
 import Logo from '@/layouts/dashboard/logo/LogoMain.vue';
 import AuthLogin from './authForms/AuthLogin.vue';
-// assets
+
 import facebookImg from '@/assets/images/icons/facebook.svg';
 import twitterImg from '@/assets/images/icons/twitter.svg';
 import googleImg from '@/assets/images/icons/google.svg';
 
-import { createApp } from 'vue';
-import { VueReCaptcha, useReCaptcha } from 'vue-recaptcha-v3';
+import { useAuthStore } from '@/stores/auth';
 
-const component = {
-  setup() {
-    const { executeRecaptcha, recaptchaLoaded } = useReCaptcha();
+const router = useRouter();
+const authStore = useAuthStore();
 
-    const recaptcha = async () => {
-      // (optional) Wait until recaptcha has been loaded.
-      await recaptchaLoaded();
-
-      // Execute reCAPTCHA with action "login".
-      // Removed the assignment of token since it's not being used
-      await executeRecaptcha('login');
-
-      // Do stuff with the received token.
-    };
-
-    return {
-      recaptcha
-    };
-  },
-  template: '<button @click="recaptcha">Execute recaptcha</button>'
-};
-
-createApp(component).use(VueReCaptcha, { siteKey: '6LeCprcaAAAAAOD0aEK7WpfHc__CyRmk3rD-otNt' });
+// Jika user sudah login, arahkan ke dashboard atau returnUrl
+onMounted(() => {
+  if (authStore.isAuthenticated && authStore.user) {
+    router.push(authStore.returnUrl || '/dashboard/default');
+  }
+});
 </script>
 
 <template>
@@ -40,7 +28,8 @@ createApp(component).use(VueReCaptcha, { siteKey: '6LeCprcaAAAAAOD0aEK7WpfHc__Cy
       <div class="round-1"></div>
       <div class="round-2"></div>
     </div>
-    <!---Login Part-->
+
+    <!-- Bagian Login -->
     <v-col cols="12" lg="12" class="d-flex align-center">
       <v-container>
         <div class="d-flex align-center justify-center" style="min-height: calc(100vh - 148px)">
@@ -50,52 +39,35 @@ createApp(component).use(VueReCaptcha, { siteKey: '6LeCprcaAAAAAOD0aEK7WpfHc__Cy
                 <v-card-text class="pa-sm-10 pa-6">
                   <div class="text-center">
                     <Logo class="mb-5" />
-                    <v-list aria-label="social list" aria-busy="true">
+
+                    <v-list aria-label="daftar sosial media">
                       <v-list-item color="secondary" variant="tonal" href="#" rounded="md" class="mb-2">
-                        <v-img
-                          :src="facebookImg"
-                          alt="social icon"
-                          class="me-2 d-inline-flex"
-                          style="vertical-align: middle"
-                          width="9"
-                          height="16"
-                        />
-                        Sign in with facebook
+                        <v-img :src="facebookImg" alt="ikon facebook" class="me-2 d-inline-flex" width="9" height="16" />
+                        Masuk dengan Facebook
                       </v-list-item>
+
                       <v-list-item color="secondary" variant="tonal" href="#" rounded="md" class="mb-2">
-                        <v-img
-                          :src="twitterImg"
-                          alt="social icon"
-                          class="me-2 d-inline-flex"
-                          style="vertical-align: middle"
-                          width="16"
-                          height="13"
-                        />
-                        Sign in with twitter
+                        <v-img :src="twitterImg" alt="ikon twitter" class="me-2 d-inline-flex" width="16" height="13" />
+                        Masuk dengan Twitter
                       </v-list-item>
+
                       <v-list-item color="secondary" variant="tonal" href="#" rounded="md" class="mb-2">
-                        <v-img
-                          :src="googleImg"
-                          alt="social icon"
-                          class="me-2 d-inline-flex"
-                          style="vertical-align: middle"
-                          width="16"
-                          height="16"
-                        />
-                        Sign in with google
+                        <v-img :src="googleImg" alt="ikon google" class="me-2 d-inline-flex" width="16" height="16" />
+                        Masuk dengan Google
                       </v-list-item>
                     </v-list>
+
                     <v-row>
                       <v-col cols="12" class="d-flex align-center">
                         <v-divider />
-                        <div class="orbtn">OR</div>
+                        <div class="orbtn">ATAU</div>
                         <v-divider />
                       </v-col>
                     </v-row>
                   </div>
-                  <!---Login Form-->
+
+                  <!-- Form Login -->
                   <AuthLogin />
-                  <!---Login Form-->
                 </v-card-text>
               </v-card>
             </v-col>
@@ -103,9 +75,10 @@ createApp(component).use(VueReCaptcha, { siteKey: '6LeCprcaAAAAAOD0aEK7WpfHc__Cy
         </div>
       </v-container>
     </v-col>
-    <!---Login Part-->
+    <!-- /Bagian Login -->
   </v-row>
 </template>
+
 <style lang="scss">
 .loginBox {
   max-width: 475px;

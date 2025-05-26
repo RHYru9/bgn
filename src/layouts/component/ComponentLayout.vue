@@ -4,7 +4,6 @@ import { RouterView } from 'vue-router';
 import { useDisplay } from 'vuetify';
 
 import VerticalSidebar from './sidebar/VerticalSidebar.vue';
-import AppBarMenu from './AppBarMenu.vue';
 import LoaderWrapper from '../dashboard/LoaderWrapper.vue';
 import Customizer from '../dashboard/customizer/CustomizerPanel.vue';
 import { useCustomizerStore } from '../../stores/customizer';

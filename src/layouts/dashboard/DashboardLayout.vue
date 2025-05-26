@@ -3,7 +3,6 @@ import { onMounted, watch, computed } from 'vue';
 import { useTheme } from 'vuetify';
 import { RouterView } from 'vue-router';
 import LoaderWrapper from './LoaderWrapper.vue';
-import BuyNow from './BuyNow.vue';
 import VerticalSidebarVue from './vertical-sidebar/VerticalSidebar.vue';
 import VerticalHeaderVue from './vertical-header/VerticalHeader.vue';
 import HorizontalHeader from './horizontal-header/HorizontalHeader.vue';
@@ -78,7 +77,6 @@ const getStyleObject = () => {
           </div>
         </v-container>
       </v-main>
-      <BuyNow />
     </v-app>
   </v-locale-provider>
 </template>

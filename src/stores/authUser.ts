@@ -6,10 +6,23 @@ const baseUrl = `${import.meta.env.VITE_API_URL}`;
 
 export const useUsersStore = defineStore('authuser', {
   state: () => ({
-    currentUser: null as any,
+    currentUser: null as null | {
+      id: number;
+      name: string;
+      email: string;
+      role: string;
+      // tambahkan properti lain sesuai response /auth/me
+    },
     loading: false,
-    error: null as any,
+    error: null as string | null,
   }),
+
+  getters: {
+    isAuthenticated: (state) => !!state.currentUser,
+    isAdmin: (state) => state.currentUser?.role === 'admin',
+    isCustomer: (state) => state.currentUser?.role === 'user',
+    isDriver: (state) => state.currentUser?.role === 'driver',
+  },
 
   actions: {
     async getCurrentUser() {
@@ -17,14 +30,19 @@ export const useUsersStore = defineStore('authuser', {
       this.error = null;
 
       try {
-        // Panggil API /auth/me yang mengembalikan data user
         const user = await fetchWrapper.get(`${baseUrl}/auth/me`);
         this.currentUser = user;
-      } catch (error) {
-        this.error = error;
+      } catch (err: any) {
+        this.error = err.message || 'Gagal mengambil data user';
+        this.currentUser = null;
       } finally {
         this.loading = false;
       }
+    },
+
+    logout() {
+      this.currentUser = null;
+      localStorage.removeItem('token');
     }
   }
 });
