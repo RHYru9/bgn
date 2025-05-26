@@ -1,4 +1,3 @@
-// src/stores/authuser.ts
 import { defineStore } from 'pinia';
 import { fetchWrapper } from '@/utils/helpers/fetch-wrapper';
 
@@ -11,7 +10,6 @@ export const useUsersStore = defineStore('authuser', {
       name: string;
       email: string;
       role: string;
-      // tambahkan properti lain sesuai response /auth/me
     },
     loading: false,
     error: null as string | null,
