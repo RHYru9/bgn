@@ -35,8 +35,11 @@ const getFinalUrl = (item: Technology) => {
         <v-spacer />
 
         <template v-if="mdAndUp">
-          <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/dashboard/default?isp=1' : '/dashboard/default'" target="_">
-            Dashboard
+          <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/home?isp=1' : '/'" target="_">
+            Home
+          </v-btn>
+          <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/produk?isp=1' : '/produk'" target="_">
+            Produk
           </v-btn>
           <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/components/buttons?isp=1' : '/components/buttons'">
             Komponen
@@ -108,7 +111,12 @@ const getFinalUrl = (item: Technology) => {
         </template>
         <v-list-item-title class="ms-3 text-h6">Dashboard</v-list-item-title>
       </v-list-item>
-
+      <v-list-item :to="ispValue ? '/produk?isp=1' : '/produk'">
+        <template #prepend>
+          <SvgSprite name="custom-line" style="width: 20px; height: 20px" />
+        </template>
+        <v-list-item-title class="ms-3 text-h6">Produk</v-list-item-title>
+      </v-list-item>
       <v-list-item :to="ispValue ? '/components/buttons?isp=1' : '/components/buttons'">
         <template #prepend>
           <SvgSprite name="custom-line" style="width: 20px; height: 20px" />

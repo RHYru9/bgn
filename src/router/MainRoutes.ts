@@ -137,16 +137,6 @@ const MainRoutes = {
       component: () => import('@/views/utilities/icons/MaterialIcons.vue')
     },
     {
-      name: 'Pricing 1',
-      path: '/pages/pricing1',
-      component: () => import('@/views/pages/pricing/PricingPage1.vue')
-    },
-    {
-      name: 'Pricing 2',
-      path: '/pages/pricing2',
-      component: () => import('@/views/pages/pricing/PricingPage2.vue')
-    },
-    {
       name: 'Customer',
       path: '/customer/customerlist',
       component: () => import('@/views/apps/customer/CustomerList.vue')
@@ -241,19 +231,9 @@ const MainRoutes = {
       component: () => import('@/views/apps/users/account-profile/profile3/ProfilePage3.vue')
     },
     {
-      name: 'ecom Products',
-      path: '/ecommerce/products',
-      component: () => import('@/views/apps/eCommerce/ProductPage.vue')
-    },
-    {
       name: 'Add Products',
       path: '/ecommerce/add-product',
       component: () => import('@/views/apps/eCommerce/AddProduct.vue')
-    },
-    {
-      path: '/barang/:id',
-      name: 'ProductDetails',
-      component: () => import('@/views/apps/ecommerce/ProductDetails.vue')
     },
     {
       name: 'Product Checkout',
@@ -275,6 +255,11 @@ const MainRoutes = {
       name: 'AddSupplier',
       component: () => import('@/views/apps/eCommerce/AddSupplier.vue')
   },
+  {
+    path: '/ulasan/ulasan',
+    name: 'ulasan',
+    component: () => import('@/views/apps/Ulasan/ulasan.vue'),
+  }
   ]
 };
 

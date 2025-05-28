@@ -42,9 +42,9 @@ const projects = shallowRef([
   },
   {
     avatar: Avatar5,
-    username: 'Stebin Ben',
+    username: 'Reyhan test',
     role: 'Leader',
-    name: 'Able Pro',
+    name: 'RhyRu 9',
     date: 'Sep, 22',
     priority: 'higher'
   }

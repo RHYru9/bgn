@@ -31,6 +31,11 @@ const PublicRoutes = {
       component: () => import('@/views/pages/landingpage/PrivacyPolicy.vue')
     },
     {
+      path: '/produk',
+      name: 'PublicProductPage',
+      component: () => import('@/views/pages/landingpage/ProductPage.vue')
+    },
+    {
       name: 'FAQs',
       path: '/faq',
       component: () => import('@/views/pages/landingpage/FAQs.vue')

@@ -5,8 +5,6 @@ import { useDisplay } from 'vuetify';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
 import { useIspValue } from '@/utils/useIspValue';
 import techData from '@/utils/techData';
-
-// types
 import type { Technology } from '@/types/tech-types';
 
 const { smAndUp } = useDisplay();
@@ -30,10 +28,10 @@ const getFinalUrl = (item: Technology) => {
         <v-col cols="12" lg="7" md="6" sm="8">
           <div class="pe-lg-4 homeContent text-center">
             <h1 class="bannerText mb-5" data-aos="fade-up" data-aos-duration="500">
-              Your Custom Dashboard Starter
+              Frontend Belum kelar, masih ke backend
             </h1>
             <p class="mb-8 text-h5 font-weight-regular" data-aos="fade-up" data-aos-duration="800">
-              Build and scale your application with a clean and customizable admin panel.
+              Sedang Dikerjakan..
             </p>
           </div>
         </v-col>

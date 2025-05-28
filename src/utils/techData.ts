@@ -10,9 +10,9 @@ import iconKebijakan from '@/assets/images/landing/tech-tailwind.svg'
 const infoData = shallowRef([
   {
     image: iconKontak,
-    title: 'Kontak',
+    title: 'Semen',
     target: '_self',
-    name: 'Hubungi Kami',
+    name: 'Semen',
     description:
       'Silakan hubungi kami untuk pertanyaan lebih lanjut atau bantuan teknis melalui email, telepon, atau formulir kontak.',
     link: '/kontak',

@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-
 import Logo from '@/layouts/dashboard/logo/LogoMain.vue';
 import AuthLogin from './authForms/AuthLogin.vue';
 
@@ -11,15 +8,6 @@ import googleImg from '@/assets/images/icons/google.svg';
 
 import { useAuthStore } from '@/stores/auth';
 
-const router = useRouter();
-const authStore = useAuthStore();
-
-// Jika user sudah login, arahkan ke dashboard atau returnUrl
-onMounted(() => {
-  if (authStore.isAuthenticated && authStore.user) {
-    router.push(authStore.returnUrl || '/dashboard/default');
-  }
-});
 </script>
 
 <template>
@@ -40,6 +28,7 @@ onMounted(() => {
                   <div class="text-center">
                     <Logo class="mb-5" />
 
+                    <!-- Tombol login dengan sosial media -->
                     <v-list aria-label="daftar sosial media">
                       <v-list-item color="secondary" variant="tonal" href="#" rounded="md" class="mb-2">
                         <v-img :src="facebookImg" alt="ikon facebook" class="me-2 d-inline-flex" width="9" height="16" />
@@ -57,6 +46,7 @@ onMounted(() => {
                       </v-list-item>
                     </v-list>
 
+                    <!-- Divider -->
                     <v-row>
                       <v-col cols="12" class="d-flex align-center">
                         <v-divider />
@@ -75,7 +65,6 @@ onMounted(() => {
         </div>
       </v-container>
     </v-col>
-    <!-- /Bagian Login -->
   </v-row>
 </template>
 

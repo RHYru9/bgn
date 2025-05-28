@@ -59,11 +59,6 @@ const sidebarItem: menu[] = [
         id: 'orderlist',
         title: 'List Transaksi',
         to: '/customer/orderlist'
-      },
-      {
-        id: 'productreview',
-        title: 'Review Produk',
-        to: '/customer/productreview'
       }
     ]
   },
@@ -105,16 +100,6 @@ const sidebarItem: menu[] = [
     to: '/ecommerce/',
     children: [
       {
-        id: 'products',
-        title: 'Produk',
-        to: '/ecommerce/products'
-      },
-      {
-        id: 'productdetail',
-        title: 'Product Detail',
-        to: '/ecommerce/product/detail/1'
-      },
-      {
         id: 'productlist',
         title: 'List Produk',
         to: '/ecommerce/productlist'
@@ -133,6 +118,11 @@ const sidebarItem: menu[] = [
         id: 'kategori-list',
         title: 'List Kategori',
         to: '/ecommerce/kategori/list'
+      },
+      {
+        id: 'ulasan',
+        title: 'Ulasan',
+        to: '/ulasan/ulasan'
       }
     ]
   },

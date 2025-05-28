@@ -1,6 +1,5 @@
 import mock from '../mockAdapter';
 
-// third-party
 import { add, sub } from 'date-fns';
 import { Chance } from 'chance';
 import product1 from '@/assets/images/e-commerce/prod-1.png';
@@ -12,11 +11,10 @@ import product6 from '@/assets/images/e-commerce/prod-6.png';
 import product7 from '@/assets/images/e-commerce/prod-7.png';
 import product8 from '@/assets/images/e-commerce/prod-8.png';
 
-//Types
+
 import type { Products } from '@/types/ecommerce/index';
 
 const chance = new Chance();
-// products list
 const products: Products[] = [
   {
     id: 1,
