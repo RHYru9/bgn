@@ -51,6 +51,11 @@ const PublicRoutes = {
       component: () => import('@/views/authentication/auth2/RegisterPage2.vue')
     },
     {
+      name: 'Produk Detail',
+      path: '/produk/detail/:id',
+      component: () => import('@/views/apps/ecommerce/ProductDetail.vue')
+    },
+    {
       name: 'Forgot Password 2',
       path: '/forgot-pwd2',
       component: () => import('@/views/authentication/auth2/ForgotPwd2.vue')

@@ -1,45 +1,42 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue';
+import { computed } from 'vue';
+import { useBarangStore } from '@/stores/apps/barang';
 
-type GenealType = {
-  title: string;
-  desc: string;
-};
+const store = useBarangStore();
 
-const generalItem = shallowRef<GenealType[]>([
+const detailBarang = computed(() => store.detailBarang);
+
+const spesifikasiBarang = computed(() => [
   {
-    title: 'Band :',
-    desc: 'Smart Band'
+    title: 'Merek:',
+    desc: detailBarang.value?.merek || '-'
   },
   {
-    title: 'Compatible Devices :',
-    desc: 'Smartphones'
+    title: 'Kategori:',
+    desc: detailBarang.value?.kategori?.nama_kategori || '-'
   },
   {
-    title: 'Ideal For :',
-    desc: 'Unisex'
+    title: 'Berat:',
+    desc: `${detailBarang.value?.berat_barang || 0} ${detailBarang.value?.satuan || ''}`
   },
   {
-    title: 'Lifestyle :',
-    desc: 'Fitness | Indoor | Sports | Swimming | Outdoor'
-  },
-  {
-    title: 'Basic Features :',
-    desc: 'Calendar | Date & Time | Timer/Stop Watch'
-  },
-  {
-    title: 'Health Tracker :',
-    desc: 'Heart Rate | Exercise Tracker'
+    title: 'Stok Minimum:',
+    desc: detailBarang.value?.stok_minimum.toString() || '0'
   }
+  //{
+    //title: 'Supplier:',
+    //desc: detailBarang.value?.supplier?.nama || '-'
+  //}
 ]);
 </script>
+
 <template>
   <v-table>
-    <tr v-for="(gen, i) in generalItem" :key="i">
+    <tr v-for="(spesifikasi, i) in spesifikasiBarang" :key="i">
       <td class="py-2">
-        <span class="text-h6 text-lightText">{{ gen.title }}</span>
+        <span class="text-h6 text-lightText">{{ spesifikasi.title }}</span>
       </td>
-      <td>{{ gen.desc }}</td>
+      <td>{{ spesifikasi.desc }}</td>
     </tr>
   </v-table>
 </template>

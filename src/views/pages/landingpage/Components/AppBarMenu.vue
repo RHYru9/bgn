@@ -29,7 +29,7 @@ const getFinalUrl = (item: Technology) => {
       <div class="d-flex align-center ga-2 w-100">
         <div class="d-flex ga-1 align-center">
           <Logo />
-          <v-chip rounded="lg" size="small" variant="outlined" color="secondary" class="px-1" style="height: 20px">v1.4.0</v-chip>
+          <v-chip rounded="lg" size="small" variant="outlined" color="secondary" class="px-1" style="height: 20px">BG</v-chip>
         </div>
 
         <v-spacer />
@@ -41,14 +41,14 @@ const getFinalUrl = (item: Technology) => {
           <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/produk?isp=1' : '/produk'" target="_">
             Produk
           </v-btn>
-          <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/components/buttons?isp=1' : '/components/buttons'">
-            Komponen
+          <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/bantuan?isp=1' : '/bantuan'">
+            Bantuan
           </v-btn>
 
           <v-menu v-model="isMenuOpen" :close-on-content-click="false">
             <template #activator="{ props }">
               <v-btn variant="text" v-bind="props" class="font-weight-medium">
-                Live Preview
+                Menu
                 <SvgSprite
                   name="custom-chevron-down-2"
                   class="ms-1"
@@ -71,7 +71,7 @@ const getFinalUrl = (item: Technology) => {
                       :src="item.image"
                       alt="technology"
                       style="width: 30px; height: 30px; min-width: 36px"
-                      :style="item.name === 'Live Preview not available' ? 'filter: grayscale(1)' : ''"
+                      :style="item.name === 'Halaman Tidak Ditemukan' ? 'filter: grayscale(1)' : ''"
                     />
                   </template>
                   {{ item.title }}
@@ -92,8 +92,8 @@ const getFinalUrl = (item: Technology) => {
         </template>
 
         <template v-else>
-          <v-btn variant="outlined" color="warning" class="font-weight-medium" to="/components/buttons" rounded="md">
-            Komponen
+          <v-btn variant="outlined" color="warning" class="font-weight-medium" to="/bantuan" rounded="md">
+            Support
           </v-btn>
           <v-btn icon rounded="sm" variant="text" size="small" @click.stop="drawer = !drawer">
             <SvgSprite name="custom-menu-outline" style="width: 20px; height: 20px" />
@@ -117,11 +117,11 @@ const getFinalUrl = (item: Technology) => {
         </template>
         <v-list-item-title class="ms-3 text-h6">Produk</v-list-item-title>
       </v-list-item>
-      <v-list-item :to="ispValue ? '/components/buttons?isp=1' : '/components/buttons'">
+      <v-list-item :to="ispValue ? '/bantuan?isp=1' : '/bantuan'">
         <template #prepend>
           <SvgSprite name="custom-line" style="width: 20px; height: 20px" />
         </template>
-        <v-list-item-title class="ms-3 text-h6">Komponen</v-list-item-title>
+        <v-list-item-title class="ms-3 text-h6">Bantuan</v-list-item-title>
       </v-list-item>
 
       <v-list-item class="px-5">
@@ -138,7 +138,7 @@ const getFinalUrl = (item: Technology) => {
                 <template #prepend>
                   <SvgSprite name="custom-line" style="width: 20px; height: 20px" />
                 </template>
-                Live Preview
+                Menu
                 <SvgSprite
                   name="custom-chevron-down-2"
                   class="ms-1"
@@ -162,7 +162,7 @@ const getFinalUrl = (item: Technology) => {
                         :src="item.image"
                         alt="technology"
                         style="width: 30px; height: 30px; min-width: 36px"
-                        :style="item.name === 'Live Preview not available' ? 'filter: grayscale(1)' : ''"
+                        :style="item.name === 'Menu Tidak Ada' ? 'filter: grayscale(1)' : ''"
                       />
                     </template>
                     {{ item.title }}

@@ -21,8 +21,8 @@ const getFinalUrl = (item: Technology) => {
       <v-row class="justify-center mb-0">
         <v-col md="5" cols="12">
           <div class="text-center">
-            <h2 class="text-h2 mb-sm-4 mb-2">Produk Yang Tersedia</h2>
-            <p class="text-h6 mb-0">Jelajahi Produk Berkualitas, Terjangkau, dan Gratis Antar, untuk pembelian tertentu.</p>
+            <h2 class="text-h2 mb-sm-4 mb-2">Halaman</h2>
+            <p class="text-h6 mb-0">Jelajahi Halaman dibawah ini, sangat membantu anda ketika ada sebuah pertanyaan, bantuan, dan ingin mengetahui lebih dalam, tentang Toko BangunGO beroperasi.</p>
           </div>
         </v-col>
         <v-col md="12" cols="12" class="pa-sm-3 pa-0"></v-col>

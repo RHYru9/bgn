@@ -1,144 +1,144 @@
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue';
-import ColorsOptions from './colorsOption';
-import { useEcomStore } from '@/stores/apps/eCommerce';
+import { ref, watch } from 'vue';
+import { useBarangStore } from '@/stores/apps/barang';
 
-const range = shallowRef([0, 300]);
+const props = defineProps({
+  modelValueCategory: {
+    type: [String, Number],
+    default: 'all',
+  },
+  modelValuePrice: {
+    type: Array as () => number[],
+    default: () => [0, 1000000],
+  },
+});
 
-const store = useEcomStore();
+const emit = defineEmits([
+  'update:modelValueCategory', 
+  'update:modelValuePrice', 
+  'applyFilters'
+]);
 
-const selectedGender = ref('');
-store.SelectGender(selectedGender);
+const selectedCategory = ref(
+  props.modelValueCategory === 'all' ? 'all' : Number(props.modelValueCategory)
+);
+const priceRange = ref([...props.modelValuePrice]);
 
-const selectedCategory = ref('all');
-store.SelectCategory(selectedCategory);
+const barangStore = useBarangStore();
 
-const selectRating = ref(0);
-const setColor = ref(1);
-
-function selectColor(e: number) {
-  setColor.value = e;
+function applyFilters() {
+  emit(
+    'update:modelValueCategory',
+    selectedCategory.value === 'all' ? 'all' : Number(selectedCategory.value)
+  );
+  emit('update:modelValuePrice', [...priceRange.value]);
+  emit('applyFilters');
 }
+
+function resetFilters() {
+  selectedCategory.value = 'all';
+  priceRange.value = [0, 1000000];
+  applyFilters();
+}
+
+watch(
+  () => props.modelValueCategory,
+  (val) => {
+    selectedCategory.value = val === 'all' ? 'all' : Number(val);
+  }
+);
+
+watch(
+  () => props.modelValuePrice,
+  (val) => {
+    priceRange.value = [...val];
+  },
+  { deep: true }
+);
 </script>
+
 <template>
-  <v-list lines="one" aria-label="gender list" aria-busy="true">
-    <v-list-item-title class="text-h5">Gender</v-list-item-title>
-    <v-list-item class="pa-0 mb-n2">
-      <v-checkbox label="Male" v-model="selectedGender" color="primary" value="male" hide-details> </v-checkbox>
-    </v-list-item>
-    <v-list-item class="pa-0 mb-n2">
-      <v-checkbox label="Female" v-model="selectedGender" color="secondary" value="female" hide-details></v-checkbox>
-    </v-list-item>
-    <v-list-item class="pa-0">
-      <v-checkbox label="Kids" v-model="selectedGender" color="error" value="kids" hide-details></v-checkbox>
-    </v-list-item>
+  <v-card variant="flat" class="mb-3">
+    <v-card-title class="d-flex justify-space-between align-center">
+      <span class="text-h6">Filter</span>
+      <v-btn 
+        variant="text" 
+        color="primary" 
+        size="small"
+        @click="resetFilters"
+      >
+        Reset
+      </v-btn>
+    </v-card-title>
+  </v-card>
+
+  <!-- Kategori Filter -->
+  <v-list lines="one" class="mb-3" aria-label="categories list">
+    <v-list-item-title class="text-h6">Kategori</v-list-item-title>
+
+    <v-radio-group v-model="selectedCategory" color="primary" class="pl-2" @update:modelValue="applyFilters">
+      <v-radio
+        label="Semua Kategori"
+        value="all"
+        hide-details
+      />
+      <v-radio
+        v-for="kategori in barangStore.kategoriList"
+        :key="kategori.id"
+        :label="kategori.nama_kategori"
+        :value="kategori.id"
+        hide-details
+      />
+    </v-radio-group>
   </v-list>
-  <v-list lines="one" class="mb-3" aria-label="categories list" aria-busy="true">
-    <v-list-item-title class="text-h5">Categories</v-list-item-title>
-    <v-list-item class="pa-0 mb-n2">
-      <v-checkbox label="All" v-model="selectedCategory" color="primary" value="all" hide-details> </v-checkbox>
-    </v-list-item>
-    <v-list-item class="pa-0 mb-n2">
-      <v-checkbox label="Electronics" v-model="selectedCategory" color="primary" value="electronics" hide-details></v-checkbox>
-    </v-list-item>
-    <v-list-item class="pa-0 mb-n2">
-      <v-checkbox label="Fashion" v-model="selectedCategory" color="primary" value="fashion" hide-details></v-checkbox>
-    </v-list-item>
-    <v-list-item class="pa-0 mb-n2">
-      <v-checkbox label="Books" v-model="selectedCategory" color="primary" value="books" hide-details></v-checkbox>
-    </v-list-item>
-    <v-list-item class="pa-0 mb-n2">
-      <v-checkbox label="Toys" v-model="selectedCategory" color="primary" value="toys" hide-details></v-checkbox>
-    </v-list-item>
-    <v-list-item class="pa-0 mb-n2">
-      <v-checkbox label="Kitchen" v-model="selectedCategory" color="primary" value="kitchen" hide-details></v-checkbox>
-    </v-list-item>
-  </v-list>
+
+  <v-divider class="my-4"></v-divider>
+
+  <!-- Rentang Harga -->
   <div class="mb-3">
-    <h5 class="text-h5 mb-0">Colors</h5>
-    <div class="d-flex ga-2 flex-wrap v-col-11 px-0">
-      <template v-for="(catcolor, i) in ColorsOptions" :key="i">
-        <v-avatar
-          class="cursor-pointer"
-          :class="setColor == i ? 'avatar-border' : ''"
-          :color="catcolor.value"
-          variant="flat"
-          size="small"
-          @click="selectColor(i)"
-        >
-        </v-avatar>
-      </template>
-    </div>
-  </div>
-  <div class="mb-3">
-    <h5 class="text-h5">Price</h5>
+    <h5 class="text-h6 mb-3">Rentang Harga (Rp)</h5>
     <v-row>
       <v-col cols="6">
-        <v-label class="mb-2 text-lightText">Min</v-label>
-        <v-text-field v-model="range[0]" aria-label="min" hide-details single-line type="number" variant="outlined"></v-text-field>
+        <v-text-field 
+          v-model.number="priceRange[0]" 
+          label="Minimum" 
+          type="number" 
+          variant="outlined"
+          :min="0"
+          density="compact"
+          @update:modelValue="applyFilters"
+        />
       </v-col>
       <v-col cols="6">
-        <v-label class="mb-2 text-lightText">Max</v-label>
-        <v-text-field v-model="range[1]" aria-label="max" hide-details single-line type="number" variant="outlined"></v-text-field>
+        <v-text-field 
+          v-model.number="priceRange[1]" 
+          label="Maksimum" 
+          type="number" 
+          variant="outlined"
+          :min="priceRange[0]"
+          density="compact"
+          @update:modelValue="applyFilters"
+        />
       </v-col>
     </v-row>
-    <div aria-label="Select a value within the range of 0 to 1000">
-      <v-range-slider
-        v-model="range"
-        color="primary"
-        thumb-size="16"
-        track-color="secondary200"
-        track-size="4"
-        tick-size="4"
-        :max="1000"
-        :min="0"
-        :step="1"
-        hide-details
-        class="mt-2"
-      ></v-range-slider>
-    </div>
-  </div>
-  <div>
-    <h5 class="text-h5 mb-0">Rating</h5>
-    <div class="d-flex align-center">
-      <v-rating
-        hover
-        half-increments
-        v-model="selectRating"
-        class="ma-2"
-        density="compact"
-        color="inputBorder"
-        active-color="warning"
-      ></v-rating>
-      <pre class="mb-0 text-h6">({{ selectRating }})</pre>
-    </div>
-  </div>
-  <v-btn color="primary" rounded="md" variant="text" block class="mt-5">Reset all filters</v-btn>
-</template>
-<style lang="scss">
-.avatar-border {
-  border: 3px solid rgba(var(--v-theme-darkText), 0.2);
-}
-.custom-accordion {
-  padding: 18px 2px;
 
-  min-height: 30px !important;
-  .v-expansion-panel-title__overlay {
-    background-color: transparent;
-  }
-}
-.acco-body {
-  .v-expansion-panel-text__wrapper {
-    padding: 5px 0;
-  }
-}
-.custom-radio-box {
-  .v-selection-control-group {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  .v-selection-control {
-    flex: 50%;
-  }
+    <v-range-slider
+      v-model="priceRange"
+      :max="1000000"
+      :min="0"
+      :step="10000"
+      thumb-label="always"
+      thumb-size="24"
+      color="primary"
+      track-color="grey-lighten-2"
+      class="mt-2"
+      @update:modelValue="applyFilters"
+    />
+  </div>
+</template>
+
+<style scoped>
+.v-list-item {
+  min-height: 40px;
 }
 </style>

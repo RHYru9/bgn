@@ -1,81 +1,106 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
-import { useEcomStore } from '@/stores/apps/eCommerce';
+import { useBarangStore } from '@/stores/apps/barang';
 import 'vue3-carousel/dist/carousel.css';
 import FloatingCart from '../cart/FloatingCart.vue';
 
-const store = useEcomStore();
+const router = useRouter();
+const store = useBarangStore();
+
+const props = defineProps({
+  currentBarangId: {
+    type: Number,
+    required: true
+  }
+});
 
 onMounted(() => {
-  store.fetchProducts();
+  store.ambilSemuaBarang();
 });
 
-const getProducts = computed(() => {
-  return store.products;
-});
-
-const emit = defineEmits(['handlecart', 'handlewishlist']);
 const wishlist = ref<number[]>([]);
 const successSnackbar = ref(false);
 const snackbarMessage = ref('');
 
-function toggleWishlist(productId: number) {
-  if (wishlist.value.includes(productId)) {
-    wishlist.value = wishlist.value.filter((id) => id !== productId);
-    snackbarMessage.value = 'Removed from favourites';
+function toggleWishlist(barangId: number) {
+  if (wishlist.value.includes(barangId)) {
+    wishlist.value = wishlist.value.filter((id) => id !== barangId);
+    snackbarMessage.value = 'Dihapus dari favorit';
   } else {
-    wishlist.value.push(productId);
-    snackbarMessage.value = 'Added to favourites';
+    wishlist.value.push(barangId);
+    snackbarMessage.value = 'Ditambahkan ke favorit';
   }
-  emit('handlewishlist', wishlist.value);
   successSnackbar.value = true;
 }
 
-function isInWishlist(productId: number) {
-  return wishlist.value.includes(productId);
+function isInWishlist(barangId: number) {
+  return wishlist.value.includes(barangId);
 }
 </script>
 
 <template>
   <v-card variant="outlined" class="bg-surface overflow-hidden" rounded="lg">
     <v-card-item>
-      <v-card-title class="text-subtitle-1 pa-0"> Related Products </v-card-title>
+      <v-card-title class="text-subtitle-1 pa-0">Produk Serupa</v-card-title>
     </v-card-item>
     <v-divider></v-divider>
     <v-card-text class="pa-0">
       <perfect-scrollbar style="height: 265px">
-        <v-list class="relatedCar py-0" aria-label="product list" aria-busy="true">
-          <v-list-item v-for="(product, i) in getProducts" :value="product.name" class="py-2 pt-4" :key="i" border>
+        <v-list class="relatedCar py-0" aria-label="daftar produk" aria-busy="true">
+          <v-list-item 
+            v-for="(barang, i) in store.barangSerupa(props.currentBarangId)" 
+            :value="barang.nama_barang" 
+            class="py-2 pt-4 cursor-pointer" 
+            :key="i" 
+            border
+            @click="router.push(`/produk/detail/${barang.id}`)"
+          >
             <div class="d-flex">
               <v-avatar size="62" rounded="md" variant="outlined" color="borderLight" class="bg-containerBg">
-                <img :src="product.image" alt="product" width="62" style="min-width: 62px" />
+                <img 
+                  :src="`http://127.0.0.1:8000/${barang.gambar_barang}`" 
+                  :alt="barang.nama_barang" 
+                  width="62" 
+                  style="min-width: 62px" 
+                />
               </v-avatar>
               <div class="ms-3">
-                <h5 class="text-subtitle-1 text-lightText mb-0">{{ product.name }}</h5>
-                <p class="text-h6 text-lightText text-truncate mb-1">{{ product.description }}</p>
-                <h5 class="text-h5 text-lightText mb-1">${{ product.salePrice }}</h5>
-                <v-rating color="inputBorder" size="small" active-color="warning" half-increments :model-value="3.5" density="compact">
-                </v-rating>
+                <h5 class="text-subtitle-1 text-lightText mb-0">{{ barang.nama_barang }}</h5>
+                <p class="text-h6 text-lightText text-truncate mb-1">{{ barang.merek }}</p>
+                <h5 class="text-h5 text-lightText mb-1">Rp{{ Number(barang.harga_jual).toLocaleString('id-ID') }}</h5>
+                <div class="text-caption text-lightText">Stok: {{ barang.stok }} {{ barang.satuan }}</div>
               </div>
             </div>
 
             <template v-slot:append>
-              <v-btn icon variant="text" aria-label="wishlist" color="lightText" rounded="md" @click="toggleWishlist(product.id)">
+              <v-btn 
+                icon 
+                variant="text" 
+                aria-label="favorit" 
+                color="lightText" 
+                rounded="md" 
+                @click.stop="toggleWishlist(barang.id)"
+              >
                 <SvgSprite
-                  :name="isInWishlist(product.id) ? 'custom-heart-fill' : 'custom-heart-outline'"
-                  :class="isInWishlist(product.id) ? 'text-error' : 'text-lightText'"
+                  :name="isInWishlist(barang.id) ? 'custom-heart-fill' : 'custom-heart-outline'"
+                  :class="isInWishlist(barang.id) ? 'text-error' : 'text-lightText'"
                   style="width: 20px; height: 20px"
                 />
               </v-btn>
             </template>
           </v-list-item>
+
           <v-list-item class="pa-6">
-            <v-btn color="secondary" rounded="md" href="/ecommerce/products" variant="outlined" block>View all products</v-btn>
+            <v-btn color="secondary" rounded="md" href="/produk" variant="outlined" block>
+              Lihat semua produk
+            </v-btn>
           </v-list-item>
         </v-list>
       </perfect-scrollbar>
     </v-card-text>
+
     <v-snackbar
       variant="flat"
       location="top right"
@@ -92,6 +117,7 @@ function isInWishlist(productId: number) {
 
   <FloatingCart />
 </template>
+
 <style lang="scss">
 .relatedCar {
   .v-list-item {

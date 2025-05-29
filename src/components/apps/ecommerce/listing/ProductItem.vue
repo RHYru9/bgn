@@ -89,7 +89,7 @@ function updateCartQuantity(newQuantity: number) {
 <template>
   <v-card variant="outlined" rounded="lg" class="white bg-surface overflow-hidden h-100">
     <div class="position-relative">
-      <router-link :to="`/ecommerce/product/detail/${goto}`">
+      <router-link :to="`/produk/detail/${goto}`">
         <v-img
           :src="image"
           :alt="name"

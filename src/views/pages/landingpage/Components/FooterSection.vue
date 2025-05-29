@@ -17,82 +17,82 @@ const getFinalUrl = (link: string) => {
 
 const list1 = shallowRef([
   {
-    name: 'Profile',
-    link: 'https://themeforest.net/user/phoenixcoded'
+    name: 'Profil Perusahaan',
+    link: '/profil'
   },
   {
-    name: 'Portfolio',
-    link: 'https://themeforest.net/user/phoenixcoded/portfolio'
+    name: 'Tentang Kami',
+    link: '/tentang-kami'
   },
   {
-    name: 'Follow Us',
-    link: 'https://themeforest.net/user/phoenixcoded/followers'
+    name: 'Beranda',
+    link: '/'
   },
   {
-    name: 'Website',
-    link: 'https://phoenixcoded.net/'
+    name: 'Github',
+    link: 'https://github.com/rhyru9/'
   }
 ]);
 const list2 = shallowRef([
   {
-    name: 'Documentation',
-    link: 'https://phoenixcoded.gitbook.io/able-pro'
+    name: 'Dokumentasi API',
+    link: 'https://github.com/rhyru9/bangunan-api'
   },
   {
-    name: 'Feature Request',
-    link: 'https://phoenixcoded.gitbook.io/able-pro/v/vue/roadmap/'
+    name: 'FAQ',
+    link: '/faq'
   },
   {
-    name: 'RoadMap',
-    link: 'https://phoenixcoded.gitbook.io/able-pro/v/vue/roadmap/'
+    name: 'Bantuan',
+    link: '/bantuan'
   },
   {
-    name: 'Support',
-    link: 'https://phoenixcoded.authordesk.app/'
+    name: 'Dukungan Teknis',
+    link: '/support'
   },
   {
-    name: 'Email Us',
-    link: 'https://themeforest.net/user/phoenixcoded#contact'
+    name: 'Kontak Kami',
+    link: '/kontak'
   }
 ]);
 const list3 = shallowRef([
   {
-    name: 'CodeIgniter',
-    link: 'https://ableproadmin.com/codeigniter/default/public/'
+    name: 'PT Semen Gresik',
+    link: '/'
   },
   {
-    name: 'React',
-    link: 'https://ableproadmin.com/react/'
+    name: 'PT Paku Indonesia',
+    link: '/'
   },
   {
-    name: 'Vue with laravel',
-    link: 'https://phplaravel-207002-4524103.cloudwaysapps.com/build/dashboards/default'
+    name: 'PT Paku Lamongan',
+    link: '/'
   },
   {
-    name: 'Angular',
-    link: 'https://ableproadmin.com/angular/default/'
+    name: 'PT Pasir Nusantara',
+    link: '/'
   },
   {
-    name: 'Next Js',
-    link: 'https://able-pro-material-next-ts-navy.vercel.app/'
+    name: 'PT Cat Warna',
+    link: '/'
   },
   {
-    name: 'Bootstrap 5',
-    link: 'https://ableproadmin.com'
-  },
-  {
-    name: '.Net',
-    link: 'https://able-pro.azurewebsites.net/'
+    name: 'PT Pribumi Bangun Jaya',
+    link: '/'
   }
 ]);
 const list4 = shallowRef([
   {
-    name: 'Support Policy',
-    link: 'https://themeforest.net/page/item_support_policy'
+    name: 'Syarat & Ketentuan',
+    link: '/syarat-ketentuan'
   },
   {
-    name: 'Licenses Term',
-    link: 'https://themeforest.net/licenses/standard'
+    name: 'Karir di bangunGO',
+    link: '/lowongan'
+  },
+  {
+    name: 'Kebijakan Privasi',
+    link: '/kebijakan-privasi'
   }
 ]);
 </script>
@@ -107,13 +107,12 @@ const list4 = shallowRef([
               <div class="contactDetails pe-lg-6">
                 <Logo />
                 <p class="mt-4 text-h6">
-                  Phoenixcoded has gained the trust of over 5.5K customers since 2015, thanks to our commitment to delivering high-quality
-                  products. Our experienced team players are responsible for managing Able Pro.
+                  bangunGO dipercaya oleh ribuan pengguna di seluruh Indonesia sebagai solusi manajemen bahan bangunan dan proyek konstruksi. Kami berkomitmen menyediakan layanan dan produk terbaik untuk kebutuhan pembangunan Anda.
                 </p>
               </div>
             </v-col>
             <v-col lg="2" md="3" cols="6">
-              <h5 class="text-h5 mb-md-6 mb-4">Company</h5>
+              <h5 class="text-h5 mb-md-6 mb-4">Perusahaan</h5>
               <div class="d-flex flex-column footer-list">
                 <a v-for="(list, i) in list1" :key="i" :href="list.link" class="text-h6" target="_blank">
                   {{ list.name }}
@@ -121,7 +120,7 @@ const list4 = shallowRef([
               </div>
             </v-col>
             <v-col lg="2" md="3" cols="6">
-              <h5 class="text-h5 mb-md-6 mb-4">Help & Support</h5>
+              <h5 class="text-h5 mb-md-6 mb-4">Bantuan & Dukungan</h5>
               <div class="d-flex flex-column footer-list">
                 <a v-for="(list, i) in list2" :key="i" :href="list.link" class="text-h6" target="_blank">
                   {{ list.name }}
@@ -129,7 +128,7 @@ const list4 = shallowRef([
               </div>
             </v-col>
             <v-col lg="2" md="3" cols="6">
-              <h5 class="text-h5 mb-md-6 mb-4">More products</h5>
+              <h5 class="text-h5 mb-md-6 mb-4">Rekanan Kami</h5>
               <div class="d-flex flex-column footer-list">
                 <a v-for="(list, i) in list3" :key="i" :href="getFinalUrl(list.link)" class="text-h6" target="_blank">
                   {{ list.name }}
@@ -137,7 +136,7 @@ const list4 = shallowRef([
               </div>
             </v-col>
             <v-col lg="2" md="3" cols="6">
-              <h5 class="text-h5 mb-md-6 mb-4">Useful Resources</h5>
+              <h5 class="text-h5 mb-md-6 mb-4">Informasi Lainnya</h5>
               <div class="d-flex flex-column footer-list">
                 <a v-for="(list, i) in list4" :key="i" :href="list.link" class="text-h6" target="_blank">
                   {{ list.name }}
@@ -155,8 +154,8 @@ const list4 = shallowRef([
       <v-row class="align-center">
         <v-col sm="6">
           <h6 class="text-h6 text-lightText mb-0">
-            © Handcrafted by Team
-            <a href="https://themeforest.net/user/phoenixcoded" class="text-primary text-decoration-none">Phoenixcoded</a>
+            © 2025
+            <span class="text-primary">bangunGO</span>. Dibuat dengan sepenuh hati oleh tim RhyRu9 Indonesia.
           </h6>
         </v-col>
         <v-col sm="6" class="text-end">
@@ -164,18 +163,19 @@ const list4 = shallowRef([
             icon
             variant="plain"
             size="small"
-            href="https://www.facebook.com/Phoenixcoded/"
+            href="https://github.com/rhyru9/"
             target="_"
-            aria-label="facebook"
+            aria-label="github"
             color="secondary"
           >
-            <SvgSprite name="custom-facebook" />
+            <SvgSprite name="custom-github" />
           </v-btn>
         </v-col>
       </v-row>
     </v-container>
   </div>
 </template>
+
 <style lang="scss">
 .footer-list {
   a {

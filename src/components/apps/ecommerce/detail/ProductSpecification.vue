@@ -1,46 +1,36 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue';
+import { computed } from 'vue';
+import { useBarangStore } from '@/stores/apps/barang';
 
-type GenealType = {
-  title: string;
-  desc: string;
-};
+const store = useBarangStore();
 
-type SpecificationType = {
-  title: string;
-  desc: string;
-};
-
-const generalItem = shallowRef<GenealType[]>([
+const generalItem = computed(() => [
   {
-    title: 'Wearable Device Type:',
-    desc: 'Smart Band'
+    title: 'Kategori Produk:',
+    desc: store.currentBarang?.kategori?.nama_kategori || '-'
   },
   {
-    title: 'Compatible Devices:',
-    desc: 'Smartphones'
-  },
-  {
-    title: 'Ideal For :',
-    desc: 'Unisex'
+    title: 'Deskripsi Kategori:',
+    desc: store.currentBarang?.kategori?.deskripsi || '-'
   }
 ]);
 
-const specificationItem = shallowRef<SpecificationType[]>([
+const specificationItem = computed(() => [
   {
-    title: 'Brand:',
-    desc: 'Apple'
+    title: 'Supplier:',
+    desc: store.currentBarang?.supplier?.nama || '-'
   },
   {
-    title: 'Model Series:',
-    desc: 'Watch SE'
+    title: 'Alamat Supplier:',
+    desc: store.currentBarang?.supplier?.alamat || '-'
   },
   {
-    title: 'Model Number:',
-    desc: 'MYDT2HN/A'
+    title: 'Kontak Supplier:',
+    desc: store.currentBarang?.supplier?.no_telp || '-'
   }
 ]);
 </script>
+
 <template>
   <v-row>
     <v-col cols="12" sm="6">
@@ -56,7 +46,7 @@ const specificationItem = shallowRef<SpecificationType[]>([
       </v-table>
     </v-col>
     <v-col cols="12" sm="6">
-      <h5 class="text-h5 mb-4">Manufacturer Details</h5>
+      <h5 class="text-h5 mb-4">Supplier Details</h5>
       <v-divider></v-divider>
       <v-table class="mt-4">
         <tr v-for="(item, i) in specificationItem" :key="i">

@@ -1,16 +1,16 @@
 import { shallowRef } from 'vue'
 
 // assets
-import iconKontak from '@/assets/images/landing/tech-bootstrap.svg'
-import iconFAQ from '@/assets/images/landing/tech-react.svg'
-import iconTentang from '@/assets/images/landing/tech-angular.svg'
-import iconKarir from '@/assets/images/landing/tech-node.svg'
-import iconKebijakan from '@/assets/images/landing/tech-tailwind.svg'
+import iconKontak from '@/assets/images/landing/svg-repo-tentang.svg'
+import iconFAQ from '@/assets/images/landing/svg-repo-faq.svg'
+import iconTentang from '@/assets/images/landing/company-svg-tree.svg'
+import iconKarir from '@/assets/images/landing/career-svg-tree.svg'
+import iconKebijakan from '@/assets/images/landing/privacypolicy-svg-tree.svg'
 
 const infoData = shallowRef([
   {
     image: iconKontak,
-    title: 'Semen',
+    title: 'Kontak',
     target: '_self',
     name: 'Semen',
     description:
