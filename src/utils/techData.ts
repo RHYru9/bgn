@@ -12,7 +12,7 @@ const infoData = shallowRef([
     image: iconKontak,
     title: 'Kontak',
     target: '_self',
-    name: 'Semen',
+    name: 'Tentang',
     description:
       'Silakan hubungi kami untuk pertanyaan lebih lanjut atau bantuan teknis melalui email, telepon, atau formulir kontak.',
     link: '/kontak',
@@ -35,7 +35,7 @@ const infoData = shallowRef([
     name: 'Profil Perusahaan',
     description:
       'Kami adalah tim yang berdedikasi dalam menciptakan solusi digital efisien dan andal untuk berbagai kebutuhan bisnis.',
-    link: '/tentang',
+    link: '/profil',
     free: null
   },
   {

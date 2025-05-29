@@ -12,7 +12,7 @@ const cartStore = useCartStore();
 const selectedCategory = ref('all');
 const priceRange = ref([0, 1000000000]);
 const currentPage = ref(1);
-const itemsPerPage = 6;
+const itemsPerPage = 12; // 4 baris x 3 kolom
 
 onMounted(async () => {
   cartStore.loadFromStorage();
@@ -20,12 +20,10 @@ onMounted(async () => {
   await barangStore.ambilKategori();
 });
 
-// Kategori dari store
 const kategori = computed(() => {
   return barangStore.kategoriList.map(k => k.nama_kategori);
 });
 
-// Filter produk berdasarkan kategori & rentang harga
 const filteredProducts = computed(() => {
   if (!barangStore.barangList.length) return [];
   return barangStore.barangList.filter(barang => {
@@ -37,16 +35,13 @@ const filteredProducts = computed(() => {
   });
 });
 
-// Paginasi produk
 const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   return filteredProducts.value.slice(start, start + itemsPerPage);
 });
 
-// Total halaman
 const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage));
 
-// Tambah produk ke keranjang
 function handleAddToCart(product: any) {
   cartStore.addToCart({
     id: product.id,
@@ -58,14 +53,12 @@ function handleAddToCart(product: any) {
   });
 }
 
-// Reset filter
 function resetFilters() {
   selectedCategory.value = 'all';
   priceRange.value = [0, 1000000];
   currentPage.value = 1;
 }
 
-// Format harga
 function formatPrice(price: number) {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -74,7 +67,6 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
-// Debug log (opsional)
 watchEffect(() => {
   console.log('Selected Category:', selectedCategory.value);
   console.log('Filtered:', filteredProducts.value.length);
@@ -89,11 +81,9 @@ watchEffect(() => {
         <p class="text-h6 mb-0">Jelajahi Produk Berkualitas, Terjangkau, dan Gratis Antar, untuk pembelian tertentu.</p>
       </div>
 
-      <!-- Filter -->
       <v-card variant="outlined" class="mb-6" rounded="lg">
         <v-card-text class="pa-4">
           <v-row align="center" no-gutters>
-            <!-- Category -->
             <v-col cols="12" md="6" class="pe-md-3">
               <v-select
                 v-model="selectedCategory"
@@ -114,7 +104,6 @@ watchEffect(() => {
               </v-select>
             </v-col>
 
-            <!-- Price -->
             <v-col cols="12" md="5" class="px-md-2">
               <div class="price-filter">
                 <label class="text-caption text-medium-emphasis mb-1 d-block">
@@ -138,7 +127,6 @@ watchEffect(() => {
               </div>
             </v-col>
 
-            <!-- Reset -->
             <v-col cols="12" md="1" class="ps-md-3">
               <v-btn
                 v-if="selectedCategory !== 'all' || priceRange[0] !== 0 || priceRange[1] !== 1000000"
@@ -157,7 +145,6 @@ watchEffect(() => {
       </v-card>
 
       <v-row>
-        <!-- Loading -->
         <v-col cols="12" v-if="barangStore.loading">
           <v-card variant="outlined" class="bg-surface mb-6" rounded="lg">
             <v-card-text class="text-center py-12">
@@ -167,7 +154,6 @@ watchEffect(() => {
           </v-card>
         </v-col>
 
-        <!-- Error -->
         <v-col cols="12" v-else-if="barangStore.error">
           <v-card variant="outlined" class="bg-surface mb-6" rounded="lg">
             <v-card-text class="text-center py-12">
@@ -180,7 +166,6 @@ watchEffect(() => {
           </v-card>
         </v-col>
 
-        <!-- Produk -->
         <v-col cols="12" v-else>
           <div class="d-flex justify-space-between align-center mb-4">
             <div>
@@ -200,7 +185,6 @@ watchEffect(() => {
             </div>
           </div>
 
-          <!-- Grid Produk -->
           <v-row v-if="paginatedProducts.length" class="mt-2">
             <v-col
               cols="12"
@@ -226,7 +210,6 @@ watchEffect(() => {
 
           <ProductEmpty v-else />
 
-          <!-- Pagination -->
           <div class="d-flex justify-center align-center mt-8" v-if="totalPages > 1">
             <v-btn
               :disabled="currentPage === 1"

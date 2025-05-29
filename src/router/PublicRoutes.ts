@@ -111,6 +111,31 @@ const PublicRoutes = {
       component: () => import('@/views/authentication/auth1/CodeVerification1.vue')
     },
     {
+      name: 'Profil Perusahaan',
+      path: '/profil',
+      component: () => import('@/views/pages/landingpage/Components/ProfilePerusahaan.vue')
+    },
+    {
+      name: 'Syarat dan Ketentuan',
+      path: '/syarat-ketentuan',
+      component: () => import('@/views/pages/landingpage/Components/syarat-ketentuan.vue')
+    },
+        {
+      name: 'Privasi',
+      path: '/kebijakan-privasi',
+      component: () => import('@/views/pages/landingpage/Components/privasi.vue')
+    },
+    {
+      name: 'Kontak Kami',
+      path: '/kontak',
+      component: () => import('@/views/pages/landingpage/Components/Kontak.vue')
+    },
+    {
+      name: 'Dukungan Teknis',
+      path: '/support',
+      component: () => import('@/views/pages/landingpage/Components/DukunganTeknis.vue')
+    },
+    {
       name: 'Coming Soon 1',
       path: '/comingsoon1',
       component: () => import('@/views/pages/maintenance/comingsoon/ComingSoonPage1.vue')

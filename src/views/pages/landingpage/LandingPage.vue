@@ -11,7 +11,7 @@ import Technology from './Components/TechnologySection.vue';
 import ProdukPage from './Components/ProductPage.vue';
 //import DownloadSection from './Components/DownloadSection.vue';
 //import PartnerSection from './Components/PartnerSection.vue';
-//import NewsLetter from './Components/NewsLetter.vue';
+import NewsLetter from './Components/NewsLetter.vue';
 
 onMounted(() => {
   AOS.init();
@@ -25,6 +25,7 @@ onMounted(() => {
       <HomeBanner />
       <ProdukPage />
       <Technology />
+      <NewsLetter />
       <Footer />
     </v-main>
   </v-layout>

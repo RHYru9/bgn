@@ -58,7 +58,7 @@ const getFinalUrl = (item: Technology) => {
                     variant="flat"
                     class="ms-2"
                     target="_blank"
-                    href="https://github.com/phoenixcoded/able-pro-free-admin-dashboard-template"
+                    href="https://github.com/rhyru9"
                   >
                     <SvgSprite name="custom-document-2" style="width: 20px; height: 20px" />
                   </v-btn>

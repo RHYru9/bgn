@@ -1,8 +1,17 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
-// assets
 import Logo from './LogoMain.vue';
+
+// Detect if a link is external (different domain)
+const isExternalLink = (url: string) => {
+  try {
+    const linkUrl = new URL(url, window.location.origin);
+    return linkUrl.origin !== window.location.origin;
+  } catch (e) {
+    return false;
+  }
+};
 
 const value: string = window.location.search;
 const params = new URLSearchParams(value);
@@ -16,84 +25,28 @@ const getFinalUrl = (link: string) => {
 };
 
 const list1 = shallowRef([
-  {
-    name: 'Profil Perusahaan',
-    link: '/profil'
-  },
-  {
-    name: 'Tentang Kami',
-    link: '/tentang-kami'
-  },
-  {
-    name: 'Beranda',
-    link: '/'
-  },
-  {
-    name: 'Github',
-    link: 'https://github.com/rhyru9/'
-  }
+  { name: 'Profil Perusahaan', link: '/profil' },
+  { name: 'Beranda', link: '/' },
+  { name: 'Github', link: 'https://github.com/rhyru9/' }
 ]);
 const list2 = shallowRef([
-  {
-    name: 'Dokumentasi API',
-    link: 'https://github.com/rhyru9/bangunan-api'
-  },
-  {
-    name: 'FAQ',
-    link: '/faq'
-  },
-  {
-    name: 'Bantuan',
-    link: '/bantuan'
-  },
-  {
-    name: 'Dukungan Teknis',
-    link: '/support'
-  },
-  {
-    name: 'Kontak Kami',
-    link: '/kontak'
-  }
+  { name: 'Dokumentasi API', link: 'https://github.com/rhyru9/bangunan-api' },
+  { name: 'FAQ', link: '/faq' },
+  { name: 'Pusat Dukungan Teknis', link: '/support' },
+  { name: 'Kontak Kami', link: '/kontak' }
 ]);
 const list3 = shallowRef([
-  {
-    name: 'PT Semen Gresik',
-    link: '/'
-  },
-  {
-    name: 'PT Paku Indonesia',
-    link: '/'
-  },
-  {
-    name: 'PT Paku Lamongan',
-    link: '/'
-  },
-  {
-    name: 'PT Pasir Nusantara',
-    link: '/'
-  },
-  {
-    name: 'PT Cat Warna',
-    link: '/'
-  },
-  {
-    name: 'PT Pribumi Bangun Jaya',
-    link: '/'
-  }
+  { name: 'PT Semen Gresik', link: '/' },
+  { name: 'PT Paku Indonesia', link: '/' },
+  { name: 'PT Paku Lamongan', link: '/' },
+  { name: 'PT Pasir Nusantara', link: '/' },
+  { name: 'PT Cat Warna', link: '/' },
+  { name: 'PT Pribumi Bangun Jaya', link: '/' }
 ]);
 const list4 = shallowRef([
-  {
-    name: 'Syarat & Ketentuan',
-    link: '/syarat-ketentuan'
-  },
-  {
-    name: 'Karir di bangunGO',
-    link: '/lowongan'
-  },
-  {
-    name: 'Kebijakan Privasi',
-    link: '/kebijakan-privasi'
-  }
+  { name: 'Syarat & Ketentuan', link: '/syarat-ketentuan' },
+  { name: 'Karir di bangunGO', link: '/lowongan' },
+  { name: 'Kebijakan Privasi', link: '/kebijakan-privasi' }
 ]);
 </script>
 
@@ -111,35 +64,67 @@ const list4 = shallowRef([
                 </p>
               </div>
             </v-col>
+
             <v-col lg="2" md="3" cols="6">
               <h5 class="text-h5 mb-md-6 mb-4">Perusahaan</h5>
               <div class="d-flex flex-column footer-list">
-                <a v-for="(list, i) in list1" :key="i" :href="list.link" class="text-h6" target="_blank">
-                  {{ list.name }}
+                <a
+                  v-for="(item, i) in list1"
+                  :key="i"
+                  :href="item.link"
+                  :target="isExternalLink(item.link) ? '_blank' : null"
+                  rel="noopener"
+                  class="text-h6"
+                >
+                  {{ item.name }}
                 </a>
               </div>
             </v-col>
+
             <v-col lg="2" md="3" cols="6">
               <h5 class="text-h5 mb-md-6 mb-4">Bantuan & Dukungan</h5>
               <div class="d-flex flex-column footer-list">
-                <a v-for="(list, i) in list2" :key="i" :href="list.link" class="text-h6" target="_blank">
-                  {{ list.name }}
+                <a
+                  v-for="(item, i) in list2"
+                  :key="i"
+                  :href="item.link"
+                  :target="isExternalLink(item.link) ? '_blank' : null"
+                  rel="noopener"
+                  class="text-h6"
+                >
+                  {{ item.name }}
                 </a>
               </div>
             </v-col>
+
             <v-col lg="2" md="3" cols="6">
-              <h5 class="text-h5 mb-md-6 mb-4">Rekanan Kami</h5>
+              <h5 class="text-h5 mb-md-6 mb-4">Mitra Kami</h5>
               <div class="d-flex flex-column footer-list">
-                <a v-for="(list, i) in list3" :key="i" :href="getFinalUrl(list.link)" class="text-h6" target="_blank">
-                  {{ list.name }}
+                <a
+                  v-for="(item, i) in list3"
+                  :key="i"
+                  :href="getFinalUrl(item.link)"
+                  :target="isExternalLink(item.link) ? '_blank' : null"
+                  rel="noopener"
+                  class="text-h6"
+                >
+                  {{ item.name }}
                 </a>
               </div>
             </v-col>
+
             <v-col lg="2" md="3" cols="6">
               <h5 class="text-h5 mb-md-6 mb-4">Informasi Lainnya</h5>
               <div class="d-flex flex-column footer-list">
-                <a v-for="(list, i) in list4" :key="i" :href="list.link" class="text-h6" target="_blank">
-                  {{ list.name }}
+                <a
+                  v-for="(item, i) in list4"
+                  :key="i"
+                  :href="item.link"
+                  :target="isExternalLink(item.link) ? '_blank' : null"
+                  rel="noopener"
+                  class="text-h6"
+                >
+                  {{ item.name }}
                 </a>
               </div>
             </v-col>
@@ -148,14 +133,15 @@ const list4 = shallowRef([
       </v-col>
     </v-row>
   </v-footer>
+
   <v-divider></v-divider>
+
   <div class="sub-footer text-surface bg-gray100 py-4">
     <v-container class="py-0">
       <v-row class="align-center">
         <v-col sm="6">
           <h6 class="text-h6 text-lightText mb-0">
-            © 2025
-            <span class="text-primary">bangunGO</span>. Dibuat dengan sepenuh hati oleh tim RhyRu9 Indonesia.
+            © 2025 <span class="text-primary">bangunGO</span>. Dibuat dengan sepenuh hati oleh tim RhyRu9 Indonesia.
           </h6>
         </v-col>
         <v-col sm="6" class="text-end">
@@ -164,7 +150,8 @@ const list4 = shallowRef([
             variant="plain"
             size="small"
             href="https://github.com/rhyru9/"
-            target="_"
+            target="_blank"
+            rel="noopener"
             aria-label="github"
             color="secondary"
           >
