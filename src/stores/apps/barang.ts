@@ -143,7 +143,7 @@ export const useBarangStore = defineStore('barang', {
         if (response.data.success) {
           this.barangList = response.data.data.map(item => ({
             ...item,
-            harga_jual: String(Number(item.harga_jual)) // Ensure harga_jual is properly formatted
+            harga_jual: String(Number(item.harga_jual))
           }));
         } else {
           throw new Error('Gagal mengambil data barang');

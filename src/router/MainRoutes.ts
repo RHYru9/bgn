@@ -12,11 +12,6 @@ const MainRoutes = {
       component: () => import('@/views/dashboards/default/DefaultDashboard.vue')
     },
     {
-      name: 'Analytics',
-      path: '/dashboard/analytics',
-      component: () => import('@/views/dashboards/analytics/AnalyticsDashboard.vue')
-    },
-    {
       name: 'Starter',
       path: '/starter',
       component: () => import('@/views/StarterPage.vue')

@@ -1,177 +1,257 @@
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useRatingStore } from '@/stores/apps/ranting';
+import { useAuthStore } from '@/stores/auth';
+import { useBarangStore } from '@/stores/apps/barang';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
-import user1 from '@/assets/images/users/avatar-1.png';
-import user2 from '@/assets/images/users/avatar-2.png';
-import user3 from '@/assets/images/users/avatar-3.png';
 
-type commentsType = {
-  name: string;
-  desc: string;
-  avatar: string;
-  date: string;
-  ratings: number;
-};
-const rating = ref(4);
-const comments = shallowRef<commentsType[]>([
-  {
-    name: 'Amy Woods',
-    desc: 'Zucej uko mipivohit ibir sobak jeci geeho kefaz ve rusel vucacku lonkiso ene rocuhuh cezfeg lut. Ipi bod gaare veohu jududuc bog ajifaag ej neewcaj bicgo suzag ta idnecu mofsimij woc tos ifco wohnukgah.',
-    avatar: user1,
-    date: '02/11, 2023 3:02:24 PM',
-    ratings: 3.5
-  },
-  {
-    name: 'Emily Greene',
-    desc: 'Binu dud ca pulrog imcim nekuiga osita uga do lofug bod iw. Jazuba fi bulacil ufi sejed vud dobe meiga jef terabe bac opve tum woajovog kam wicibeb jed bo.',
-    avatar: user2,
-    date: '28/10, 2023 4:28:24 AM',
-    ratings: 1.5
-  },
-  {
-    name: 'Martin Vargas',
-    desc: 'Zazsa def rozo vuko himecfo licema dil popwilfo desawniz givu zo surfok etvul. Oganumo di til verujan jodezu ew uw huzvuguv ijnu hil ruz vob medretuta ehilamuf.',
-    avatar: user3,
-    date: '25/10, 2023 11:25:24 AM',
-    ratings: 5
+// Get barangId from route params
+const route = useRoute();
+const barangId = computed(() => {
+  const idFromParams = Number(route.params.id);
+  const idFromQuery = Number(route.query.id);
+  return idFromParams || idFromQuery || 0;
+});
+
+// Stores
+const ratingStore = useRatingStore();
+const authStore = useAuthStore();
+const barangStore = useBarangStore();
+
+// State
+const newComment = ref('');
+const newRating = ref(0);
+const loading = ref(false);
+const showReviewForm = ref(true); // Add this to control form visibility
+
+// Fetch product reviews when component mounts or product changes
+onMounted(async () => {
+  await authStore.checkAuth(); // Ensure auth status is checked
+  await fetchProductReviews();
+});
+
+// Watch for barangId changes
+watch(barangId, async (newId) => {
+  if (newId) {
+    await fetchProductReviews();
   }
-]);
+});
+
+// Computed properties
+const productReviews = computed(() => {
+  return ratingStore.getRatingsByBarangId(barangId.value);
+});
+
+const averageRating = computed(() => {
+  return ratingStore.getAverageRatingByBarangId(barangId.value);
+});
+
+const ratingDistribution = computed(() => {
+  // Initialize array for ratings 1-5 (index 0 = 1 star, index 4 = 5 stars)
+  const distribution = [0, 0, 0, 0, 0];
+  productReviews.value.forEach(review => {
+    const rating = Math.round(review.rating);
+    const starIndex = rating - 1; // Convert rating (1-5) to array index (0-4)
+    if (starIndex >= 0 && starIndex < 5) {
+      distribution[starIndex]++;
+    }
+  });
+  return distribution;
+});
+
+const productName = computed(() => {
+  return barangStore.getNamaBarangById(barangId.value);
+});
+
+// Methods
+const fetchProductReviews = async () => {
+  if (!barangId.value) return;
+  
+  loading.value = true;
+  try {
+    await ratingStore.fetchRatings();
+  } catch (error) {
+    console.error('Failed to fetch reviews:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const submitReview = async () => {
+  if (!newComment.value.trim() || newRating.value <= 0 || !barangId.value) return;
+  if (!authStore.isAuthenticated) {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await ratingStore.createRating({
+      user_id: authStore.user?.id || 0,
+      barang_id: barangId.value,
+      rating: Math.round(newRating.value),
+      komentar: newComment.value
+    });
+    
+    newComment.value = '';
+    newRating.value = 0;
+    await fetchProductReviews();
+  } catch (error) {
+    console.error('Failed to submit review:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const formatDate = (dateString: string) => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  return new Date(dateString).toLocaleDateString('id-ID', options);
+};
 </script>
 
 <template>
   <v-row>
-    <v-col lg="12" cols="12">
-      <v-card variant="outlined" elevation="0" rounded="lg" class="h-100 d-flex align-center justify-center">
+    <!-- Rating Summary Section -->
+    <v-col cols="12">
+      <v-card variant="outlined" elevation="0" rounded="lg">
         <v-row class="mx-0 align-center">
           <v-col cols="12" md="7" sm="4" class="pa-sm-4">
             <div class="pt-sm-0 pt-5">
               <h2 class="text-h2 mb-2 d-flex align-center">
-                4
+                {{ averageRating.toFixed(1) }}
                 <span class="text-h4 text-lightText mb-0 ms-1">/5</span>
               </h2>
-              <p class="text-h6 text-lightText mb-1">Based on 275 reviews</p>
+              <p class="text-h6 text-lightText mb-1">Berdasarkan {{ productReviews.length }} ulasan</p>
               <div class="text-medium-emphasis align-center d-flex ga-2">
-                <v-rating color="inputBorder" active-color="warning" half-increments v-model="rating" density="compact"> </v-rating>
+                <v-rating 
+                  color="inputBorder" 
+                  active-color="warning" 
+                  half-increments 
+                  :model-value="averageRating" 
+                  density="compact"
+                  readonly
+                />
               </div>
             </div>
           </v-col>
           <v-col cols="12" md="5" sm="8" class="pa-sm-4">
             <div class="pa-sm-4">
-              <div class="d-flex align-center ga-4 my-2">
+              <!-- Fixed the star distribution display -->
+              <div v-for="(count, index) in ratingDistribution.slice().reverse()" :key="index" class="d-flex align-center ga-4 my-2">
                 <v-progress-linear
-                  model-value="100"
-                  aria-label="progressbar"
+                  :model-value="(count / productReviews.length) * 100 || 0"
                   height="6"
                   color="warning"
                   bg-color="gray100"
-                  bg-opacity="1"
                   rounded
-                ></v-progress-linear>
-                <div class="text-no-wrap text-caption text-lightText">5 Stars</div>
-              </div>
-              <div class="d-flex align-center ga-4 my-2">
-                <v-progress-linear
-                  model-value="80"
-                  aria-label="progressbar"
-                  height="6"
-                  color="warning"
-                  bg-color="gray100"
-                  bg-opacity="1"
-                  rounded
-                ></v-progress-linear>
-                <div class="text-no-wrap text-caption text-lightText">4 Stars</div>
-              </div>
-              <div class="d-flex align-center ga-4 my-2">
-                <v-progress-linear
-                  model-value="60"
-                  aria-label="progressbar"
-                  height="6"
-                  color="warning"
-                  bg-color="gray100"
-                  bg-opacity="1"
-                  rounded
-                ></v-progress-linear>
-                <div class="text-no-wrap text-caption text-lightText">3 Stars</div>
-              </div>
-              <div class="d-flex align-center ga-4 my-2">
-                <v-progress-linear
-                  model-value="40"
-                  aria-label="progressbar"
-                  height="6"
-                  color="warning"
-                  bg-color="gray100"
-                  bg-opacity="1"
-                  rounded
-                ></v-progress-linear>
-                <div class="text-no-wrap text-caption text-lightText">2 Stars</div>
-              </div>
-              <div class="d-flex align-center ga-4 my-2">
-                <v-progress-linear
-                  model-value="20"
-                  aria-label="progressbar"
-                  height="6"
-                  color="warning"
-                  bg-color="gray100"
-                  bg-opacity="1"
-                  rounded
-                ></v-progress-linear>
-                <div class="text-no-wrap text-caption text-lightText">1 Stars</div>
+                />
+                <div class="text-no-wrap text-caption text-lightText">
+                  {{ 5 - index }} Bintang ({{ count }})
+                </div>
               </div>
             </div>
           </v-col>
         </v-row>
       </v-card>
     </v-col>
-    <v-col lg="12">
-      <v-card variant="flat" class="d-flex align-center mb-7 bg-containerBg" rounded="lg" v-for="(comment, i) in comments" :key="i">
-        <div class="d-flex align-start ga-2 pa-4">
-          <v-avatar size="40">
-            <img :src="comment.avatar" alt="users" width="40" />
+
+    <!-- Reviews List -->
+    <v-col cols="12">
+      <v-card 
+        v-for="(review, i) in productReviews" 
+        :key="i"
+        variant="flat" 
+        class="mb-4"
+        rounded="lg"
+      >
+        <div class="d-flex align-start pa-4">
+          <v-avatar size="40" color="primary" class="mr-3">
+            <span class="text-white">{{ review.user.nama.charAt(0) }}</span>
           </v-avatar>
           <div>
-            <h6 class="text-subtitle-1 mb-0">{{ comment.name }}</h6>
-            <span class="text-caption text-lightText">{{ comment.date }}</span>
-            <div class="v-col-lg-2 px-0 py-0">
+            <h6 class="text-subtitle-1 mb-0">{{ review.user.nama }}</h6>
+            <span class="text-caption text-lightText">{{ formatDate(review.created_at) }}</span>
+            <div class="my-1">
               <v-rating
+                :model-value="review.rating"
                 size="small"
+                readonly
+                color="warning"
                 half-increments
-                v-model="comment.ratings"
-                density="compact"
-                color="inputBorder"
-                active-color="warning"
               />
             </div>
-            <p class="text-caption mt-2">{{ comment.desc }}</p>
+            <p class="text-body-2 mt-2">{{ review.komentar }}</p>
           </div>
         </div>
       </v-card>
+
+      <v-alert
+        v-if="productReviews.length === 0"
+        type="info"
+        variant="tonal"
+        class="my-4"
+      >
+        Belum ada ulasan untuk produk ini.
+      </v-alert>
+    </v-col>
+
+    <!-- Review Form -->
+    <v-col cols="12">
+      <v-card v-if="showReviewForm" class="mt-4" variant="outlined">
+        <v-card-text>
+          <div v-if="authStore.isAuthenticated">
+            <v-textarea
+              v-model="newComment"
+              label="Tulis ulasan Anda"
+              variant="outlined"
+              :disabled="loading"
+              rows="3"
+              class="mb-4"
+            ></v-textarea>
+            
+            <div class="d-flex align-center mb-4">
+              <span class="text-caption mr-2">Rating:</span>
+              <v-rating
+                v-model="newRating"
+                size="small"
+                half-increments
+                color="warning"
+                :disabled="loading"
+              />
+            </div>
+            
+            <v-btn
+              color="primary"
+              @click="submitReview"
+              :loading="loading"
+              :disabled="!newComment.trim() || newRating <= 0"
+              block
+            >
+              Kirim Ulasan
+            </v-btn>
+          </div>
+          
+          <v-alert v-else type="info" variant="tonal">
+            Silakan login untuk memberikan ulasan.
+          </v-alert>
+        </v-card-text>
+      </v-card>
     </v-col>
   </v-row>
-  <div class="text-center mb-6">
-    <v-btn variant="text" rounded="md" color="primary">View more comments</v-btn>
-  </div>
-  <div class="position-relative">
-    <v-textarea density="comfortable" hide-details placeholder="Add comment" variant="outlined"></v-textarea>
-    <div class="comment-panel d-flex justify-space-between align-center pa-3">
-      <div>
-        <v-btn icon rounded="md" aria-label="attach" color="primary" variant="text">
-          <SvgSprite name="custom-paper-clip-2" style="width: 20px; height: 20px" />
-        </v-btn>
-        <v-btn icon rounded="md" aria-label="picture" color="primary" variant="text">
-          <SvgSprite name="custom-picture-outline" style="width: 20px; height: 20px" />
-        </v-btn>
-        <v-btn icon rounded="md" aria-label="emoji" color="primary" variant="text">
-          <SvgSprite name="custom-smile-outline" style="width: 20px; height: 20px" />
-        </v-btn>
-      </div>
-      <v-btn color="primary" rounded="md" variant="flat" size="small">Comment</v-btn>
-    </div>
-  </div>
 </template>
-<style lang="scss">
-.comment-panel {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
+
+<style scoped>
+.v-card {
+  transition: all 0.3s ease;
+}
+
+.v-avatar {
+  flex-shrink: 0;
 }
 </style>
