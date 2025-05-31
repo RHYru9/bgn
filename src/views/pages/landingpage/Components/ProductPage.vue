@@ -12,7 +12,7 @@ const cartStore = useCartStore();
 const selectedCategory = ref('all');
 const priceRange = ref([0, 1000000000]);
 const currentPage = ref(1);
-const itemsPerPage = 12; // 4 baris x 3 kolom
+const itemsPerPage = 16;
 
 onMounted(async () => {
   cartStore.loadFromStorage();
@@ -189,8 +189,8 @@ watchEffect(() => {
             <v-col
               cols="12"
               sm="6"
-              md="4"
-              lg="4"
+              md="3"
+              lg="3"
               v-for="product in paginatedProducts"
               :key="product.id"
             >
@@ -210,6 +210,7 @@ watchEffect(() => {
 
           <ProductEmpty v-else />
 
+          <!-- Pagination Navigation -->
           <div class="d-flex justify-center align-center mt-8" v-if="totalPages > 1">
             <v-btn
               :disabled="currentPage === 1"

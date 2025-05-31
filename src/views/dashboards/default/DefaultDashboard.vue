@@ -1,81 +1,101 @@
 <script setup lang="ts">
-// imported components
+import { ref, onMounted } from 'vue';
+import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import WelcomeBanner from './components/WelcomeBanner.vue';
-import ChartCards from '@/views/widgets/chart/components/ChartCards.vue';
-import RepeatCustomer from '@/views/widgets/chart/components/RepeatCustomer.vue';
-import ProjectOverview from '@/views/widgets/chart/components/ProjectOverview.vue';
-import UserCard from '@/views/widgets/statistics/components/UserCard.vue';
-import ProjectCard from './components/ProjectCard.vue';
-import TransactionCard from '@/views/widgets/data/components/TransactionCard.vue';
-import TotalIncome from '@/views/widgets/chart/components/TotalIncome.vue';
+import { useTransaksiStore } from '@/stores/apps/transaksi';
+import { useAuthStore } from '@/stores/auth';
+
+import TabCard from '@/views/apps/invoice/Dashboard/TabCard.vue';
+import RecentInvoice from '@/views/apps/invoice/Dashboard/RecentInvoice.vue';
+import TotalExpense from '@/views/apps/invoice/Dashboard/TotalExpense.vue';
+import NotificationInvoice from '@/views/apps/invoice/Dashboard/NotificationInvoice.vue';
+
+// Theme breadcrumb
+const page = ref({ title: 'Dashboard Saya' });
+const breadcrumbs = ref([
+  {
+    title: 'Halaman',
+    disabled: false,
+    href: '#'
+  },
+  {
+    title: 'Dashboard',
+    disabled: true,
+    href: '#'
+  }
+]);
+
+const authStore = useAuthStore();
+const transaksiStore = useTransaksiStore();
+
+// Load data on component mount
+onMounted(async () => {
+  await transaksiStore.fetchTransaksi(authStore.token);
+});
 </script>
 
 <template>
-  <!-- -------------------------------------------------------------------- -->
-  <!-- welcome banner -->
-  <!-- -------------------------------------------------------------------- -->
+    <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+  <!-- Welcome Banner -->
   <v-row class="my-0">
     <v-col cols="12">
       <WelcomeBanner />
     </v-col>
   </v-row>
-
-  <!-- -------------------------------------------------------------------- -->
-  <!-- Chart widgets -->
-  <!-- -------------------------------------------------------------------- -->
-  <ChartCards />
-
-  <v-row class="mb-0">
-    <v-col cols="12" xl="9" md="8">
-      <v-row>
-        <!-- -------------------------------------------------------------------- -->
-        <!-- Repeat customer -->
-        <!-- -------------------------------------------------------------------- -->
-        <v-col cols="12">
-          <RepeatCustomer />
-        </v-col>
-
-        <!-- -------------------------------------------------------------------- -->
-        <!-- Project overview -->
-        <!-- -------------------------------------------------------------------- -->
-        <v-col cols="12">
-          <ProjectOverview />
-        </v-col>
-      </v-row>
-    </v-col>
-
-    <v-col cols="12" xl="3" md="4">
-      <v-row>
-        <!-- -------------------------------------------------------------------- -->
-        <!-- Project -->
-        <!-- -------------------------------------------------------------------- -->
-        <v-col cols="12">
-          <ProjectCard />
-        </v-col>
-
-        <!-- -------------------------------------------------------------------- -->
-        <!-- User card -->
-        <!-- -------------------------------------------------------------------- -->
-        <v-col cols="12">
-          <UserCard />
-        </v-col>
-      </v-row>
-    </v-col>
-  </v-row>
-
   <v-row>
-    <!-- -------------------------------------------------------------------- -->
-    <!-- Transactions -->
-    <!-- -------------------------------------------------------------------- -->
-    <v-col cols="12" md="6">
-      <TransactionCard />
+    <v-col cols="12">
+      <TabCard />
     </v-col>
 
-    <!-- -------------------------------------------------------------------- -->
-    <!-- Total income -->
-    <!-- -------------------------------------------------------------------- -->
-    <v-col cols="12" md="6">
-      <TotalIncome />
+    <v-col cols="12" lg="8" md="7">
+      <v-row>
+        <v-col cols="12" lg="6">
+          <RecentInvoice />
+        </v-col>
+
+        <v-col cols="12" lg="6">
+          <TotalExpense />
+        </v-col>
+      </v-row>
+    </v-col>
+
+    <v-col cols="12" lg="4" md="5">
+      <NotificationInvoice />
     </v-col>
   </v-row>
 </template>
+
+<style lang="scss">
+.invoiceTab {
+  --v-tabs-height: unset;
+  .v-slide-group__content {
+    @media (max-width: 960px) {
+      flex: unset;
+    }
+  }
+  .v-tab {
+    width: auto;
+    height: 100%;
+    min-width: unset;
+    --v-btn-height: unset;
+    padding: 0;
+    display: block;
+    &.v-tab-item--selected {
+      .v-card--variant-outlined {
+        border: 1px solid transparent;
+      }
+      > .v-btn__overlay {
+        opacity: calc(var(--v-hover-opacity) * var(--v-theme-overlay-multiplier));
+      }
+    }
+  }
+}
+
+// Additional responsive styling
+@media (max-width: 960px) {
+  .v-col {
+    padding-top: 10px;
+    padding-bottom: 8px;
+  }
+}
+</style>

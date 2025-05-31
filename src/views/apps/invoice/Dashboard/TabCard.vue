@@ -1,14 +1,41 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
+import { useTransaksiStore } from '@/stores/apps/transaksi';
 
 import TotalChart from './TotalChart.vue';
 import PaidChart from './PaidChart.vue';
 import PendingChart from './PendingChart.vue';
 import OverdueChart from './OverdueChart.vue';
 
-// tabs data
+const transaksiStore = useTransaksiStore();
 const tab = ref(0);
+
+// Format currency helper
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(value);
+};
+
+// Calculate percentage change
+const percentageChange = computed(() => {
+  const currentMonth = new Date().getMonth();
+  const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+  
+  const currentTotal = transaksiStore.monthlyData.data.total[currentMonth] || 0;
+  const prevTotal = transaksiStore.monthlyData.data.total[prevMonth] || 0;
+  
+  if (prevTotal === 0) return 0;
+  return ((currentTotal - prevTotal) / prevTotal) * 100;
+});
+
+// Format percentage with sign
+const formatPercentage = (value: number) => {
+  return `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
+};
 </script>
 
 <template>
@@ -23,15 +50,21 @@ const tab = ref(0);
                   <div class="d-flex align-start justify-space-between">
                     <div>
                       <h6 class="text-subtitle-1">Total</h6>
-                      <h5 class="text-h5 mb-0">£5678.09</h5>
+                      <h5 class="text-h5 mb-0">{{ formatCurrency(transaksiStore.totalNilaiTransaksi) }}</h5>
                       <div class="d-flex align-center">
-                        <h5 class="text-h5 mb-0 me-1">3</h5>
-                        <p class="text-h6 text-lightText mb-0">invoices</p>
+                        <h5 class="text-h5 mb-0 me-1">{{ transaksiStore.totalTransaksi }}</h5>
+                        <p class="text-h6 text-lightText mb-0">transaksi</p>
                       </div>
                     </div>
                     <div class="d-flex align-center">
-                      <SvgSprite name="custom-chevron-down" class="text-warning" style="width: 16px; height: 16px" />
-                      <h5 class="text-body-1 font-weight-medium text-lightText mb-0 ms-1">20.3%</h5>
+                      <SvgSprite 
+                        :name="percentageChange > 0 ? 'custom-chevron-up-fill' : 'custom-chevron-down'" 
+                        :class="percentageChange > 0 ? 'text-success' : 'text-error'" 
+                        style="width: 16px; height: 16px" 
+                      />
+                      <h5 class="text-body-1 font-weight-medium text-lightText mb-0 ms-1">
+                        {{ formatPercentage(percentageChange) }}
+                      </h5>
                     </div>
                   </div>
                 </v-card-text>
@@ -45,10 +78,10 @@ const tab = ref(0);
                   <div class="d-flex align-start justify-space-between">
                     <div>
                       <h6 class="text-subtitle-1 text-start">Paid</h6>
-                      <h5 class="text-h5 mb-0">£5678.09</h5>
+                      <h5 class="text-h5 mb-0">{{ formatCurrency(transaksiStore.paidTransaksi.reduce((sum, t) => sum + parseFloat(t.total_harga), 0)) }}</h5>
                       <div class="d-flex align-center">
-                        <h5 class="text-h5 mb-0 me-1">5</h5>
-                        <p class="text-h6 text-lightText mb-0">invoices</p>
+                        <h5 class="text-h5 mb-0 me-1">{{ transaksiStore.paidTransaksi.length }}</h5>
+                        <p class="text-h6 text-lightText mb-0">transaksi</p>
                       </div>
                     </div>
                     <div class="d-flex align-center">
@@ -67,10 +100,10 @@ const tab = ref(0);
                   <div class="d-flex align-start justify-space-between">
                     <div>
                       <h6 class="text-subtitle-1 text-start">Pending</h6>
-                      <h5 class="text-h5 mb-0">£5678.09</h5>
+                      <h5 class="text-h5 mb-0">{{ formatCurrency(transaksiStore.pendingTransaksi.reduce((sum, t) => sum + parseFloat(t.total_harga), 0)) }}</h5>
                       <div class="d-flex align-center">
-                        <h5 class="text-h5 mb-0 me-1">20</h5>
-                        <p class="text-h6 text-lightText mb-0">invoices</p>
+                        <h5 class="text-h5 mb-0 me-1">{{ transaksiStore.pendingTransaksi.length }}</h5>
+                        <p class="text-h6 text-lightText mb-0">transaksi</p>
                       </div>
                     </div>
                     <div class="d-flex align-center">
@@ -89,10 +122,10 @@ const tab = ref(0);
                   <div class="d-flex align-start justify-space-between">
                     <div>
                       <h6 class="text-subtitle-1 text-start">Overdue</h6>
-                      <h5 class="text-h5 mb-0">£5678.09</h5>
+                      <h5 class="text-h5 mb-0">{{ formatCurrency(transaksiStore.overdueTransaksi.reduce((sum, t) => sum + parseFloat(t.total_harga), 0)) }}</h5>
                       <div class="d-flex align-center">
-                        <h5 class="text-h5 mb-0 me-1">5</h5>
-                        <p class="text-h6 text-lightText mb-0">invoices</p>
+                        <h5 class="text-h5 mb-0 me-1">{{ transaksiStore.overdueTransaksi.length }}</h5>
+                        <p class="text-h6 text-lightText mb-0">transaksi</p>
                       </div>
                     </div>
                     <div class="d-flex align-center">
@@ -126,6 +159,7 @@ const tab = ref(0);
     </v-card-text>
   </v-card>
 </template>
+
 <style lang="scss">
 .invoiceTab {
   --v-tabs-height: unset;

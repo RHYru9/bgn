@@ -120,7 +120,12 @@ const PublicRoutes = {
       path: '/syarat-ketentuan',
       component: () => import('@/views/pages/landingpage/Components/syarat-ketentuan.vue')
     },
-        {
+    {
+      name: 'Karir Form',
+      path: '/karir',
+      component: () => import('@/views/pages/landingpage/Components/karirForm.vue')
+    },
+    {
       name: 'Privasi',
       path: '/kebijakan-privasi',
       component: () => import('@/views/pages/landingpage/Components/privasi.vue')

@@ -21,19 +21,7 @@ const sidebarItem: menu[] = [
   {
     title: 'Dashboard',
     icon: 'custom-home-trend',
-    to: '/dashboard/default',
-    children: [
-      {
-        id: 'default',
-        title: 'Default',
-        to: '/dashboard/default'
-      },
-      {
-        id: 'analytics',
-        title: 'Analytics',
-        to: '/dashboard/analytics'
-      }
-    ]
+    to: '/dashboard/default'
   },
   {
     title: 'Pelanggan',
@@ -46,52 +34,32 @@ const sidebarItem: menu[] = [
         to: '/customer/customerlist'
       },
       {
-        id: 'createinvoice',
-        title: 'Buat Invoice',
-        to: '/app/customer/create-invoice'
-      },
-      {
         id: 'orderdetails',
         title: 'Detail Order',
         to: '/app/customer/order-details'
-      },
-      {
-        id: 'orderlist',
-        title: 'List Transaksi',
-        to: '/customer/orderlist'
       }
     ]
   },
   {
-    title: 'Invoice',
+    title: 'Transaksi',
     icon: 'custom-invoice',
     to: '/',
     children: [
       {
         id: 'dashboard',
         title: 'Dashboard',
-        to: '/app/invoice/dashboard'
+        to: '/app/transaksi/dashboard'
       },
       {
         id: 'create',
         title: 'Buat',
-        to: '/app/invoice/create'
+        to: '/app/transaksi/buat'
       },
       {
-        id: 'details',
-        title: 'Detail',
-        to: '/app/invoice/details'
+        id: 'orderlist',
+        title: 'List Transaksi',
+        to: '/app/transaksi/list'
       },
-      {
-        id: 'list',
-        title: 'List',
-        to: '/app/invoice/list'
-      },
-      {
-        id: 'edit',
-        title: 'Edit',
-        to: '/app/invoice/edit'
-      }
     ]
   },
   {

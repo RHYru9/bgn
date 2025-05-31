@@ -1,32 +1,47 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-// common components
+import { ref, onMounted } from 'vue';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
+import { useTransaksiStore } from '@/stores/apps/transaksi';
+import { useAuthStore } from '@/stores/auth';
 
+// Dashboard components
 import TabCard from './Dashboard/TabCard.vue';
 import InvoiceStatus from './Dashboard/InvoiceStatus.vue';
 import RecentInvoice from './Dashboard/RecentInvoice.vue';
 import TotalExpense from './Dashboard/TotalExpense.vue';
 import NotificationInvoice from './Dashboard/NotificationInvoice.vue';
 
-// theme breadcrumb
-const page = ref({ title: 'My Dashboard' });
+
+// Theme breadcrumb
+const page = ref({ title: 'Dashboard Saya' });
 const breadcrumbs = ref([
   {
-    title: 'Invoice',
+    title: 'Transaksi',
     disabled: false,
     href: '#'
   },
   {
-    title: 'Invoice Summary',
+    title: 'Ringkasan Transaksi',
     disabled: true,
     href: '#'
   }
 ]);
+
+const authStore = useAuthStore();
+const transaksiStore = useTransaksiStore();
+
+// Load data on component mount
+onMounted(async () => {
+  await transaksiStore.fetchTransaksi(authStore.token);
+});
+
 </script>
+
 <template>
   <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs"></BaseBreadcrumb>
+  
   <v-row>
+    <!-- Other Dashboard Components -->
     <v-col cols="12" xl="9" lg="7">
       <TabCard />
     </v-col>
@@ -44,3 +59,30 @@ const breadcrumbs = ref([
     </v-col>
   </v-row>
 </template>
+
+<style lang="scss">
+.invoiceTab {
+  --v-tabs-height: unset;
+  .v-slide-group__content {
+    @media (max-width: 960px) {
+      flex: unset;
+    }
+  }
+  .v-tab {
+    width: auto;
+    height: 100%;
+    min-width: unset;
+    --v-btn-height: unset;
+    padding: 0;
+    display: block;
+    &.v-tab-item--selected {
+      .v-card--variant-outlined {
+        border: 1px solid transparent;
+      }
+      > .v-btn__overlay {
+        opacity: calc(var(--v-hover-opacity) * var(--v-theme-overlay-multiplier));
+      }
+    }
+  }
+}
+</style>

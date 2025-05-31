@@ -41,7 +41,7 @@ const getFinalUrl = (item: Technology) => {
           <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/produk?isp=1' : '/produk'" target="_">
             Produk
           </v-btn>
-          <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/bantuan?isp=1' : '/bantuan'">
+          <v-btn variant="text" class="font-weight-medium" :to="ispValue ? '/support?isp=1' : '/support'">
             Bantuan
           </v-btn>
 

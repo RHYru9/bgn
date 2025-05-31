@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useTheme } from 'vuetify';
+import { useTransaksiStore } from '@/stores/apps/transaksi';
 
 const theme = useTheme();
+const transaksiStore = useTransaksiStore();
 const warningColor = theme.current.value.colors.warning;
+
 const chartOptions = computed(() => {
   return {
     chart: {
@@ -49,7 +52,7 @@ const chartOptions = computed(() => {
       }
     },
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      categories: transaksiStore.monthlyData.months
     },
     legend: {
       show: false
@@ -70,26 +73,28 @@ const chartOptions = computed(() => {
     }
   };
 });
-const mixedChart = {
-  series: [
-    {
-      name: 'TEAM A',
-      type: 'column',
-      data: [12, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30, 25]
-    },
-    {
-      name: 'TEAM B',
-      type: 'line',
-      data: [17, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39, 35]
-    }
-  ]
-};
+
+const mixedChart = computed(() => {
+  return {
+    series: [
+      {
+        name: 'Pending',
+        type: 'column',
+        data: transaksiStore.monthlyData.data.pending
+      },
+      {
+        name: 'Trend',
+        type: 'line',
+        data: transaksiStore.monthlyData.data.pending.map((val: number, index: number, arr: number[]) => {
+          if (index === 0) return val;
+          return val + arr[index - 1];
+        })
+      }
+    ]
+  };
+});
 </script>
 
 <template>
-  <!-- ---------------------------------------------------- -->
-  <!-- Mixed Chart -->
-  <!-- ---------------------------------------------------- -->
-
-  <apexchart type="line" height="255" :options="chartOptions" :series="mixedChart.series"> </apexchart>
+  <apexchart type="line" height="255" :options="chartOptions" :series="mixedChart.series"></apexchart>
 </template>

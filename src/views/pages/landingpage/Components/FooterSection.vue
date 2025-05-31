@@ -3,7 +3,6 @@ import { shallowRef } from 'vue';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
 import Logo from './LogoMain.vue';
 
-// Detect if a link is external (different domain)
 const isExternalLink = (url: string) => {
   try {
     const linkUrl = new URL(url, window.location.origin);
@@ -45,7 +44,7 @@ const list3 = shallowRef([
 ]);
 const list4 = shallowRef([
   { name: 'Syarat & Ketentuan', link: '/syarat-ketentuan' },
-  { name: 'Karir di bangunGO', link: '/lowongan' },
+  { name: 'Karir di bangunGO', link: '/karir' },
   { name: 'Kebijakan Privasi', link: '/kebijakan-privasi' }
 ]);
 </script>

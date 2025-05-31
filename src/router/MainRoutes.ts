@@ -142,11 +142,6 @@ const MainRoutes = {
       component: () => import('@/views/apps/customer/CustomerList.vue')
     },
     {
-      name: 'OrderList',
-      path: '/customer/orderlist',
-      component: () => import('@/views/apps/customer/OrderList.vue')
-    },
-    {
       name: 'ProductReview',
       path: '/customer/productreview',
       component: () => import('@/views/apps/customer/ProductReviews.vue')
@@ -166,25 +161,27 @@ const MainRoutes = {
       component: () => import('@/views/apps/kategori/listkategori.vue'),
     },
     {
+      name: 'test',
+      path: '/test/transaksi',
+      component: () => import('@/views/apps/customer/order-details/tr.vue')//testing json transaksiiii
+    },
+// ==================================== Transaksi List
+    {
       name: 'Invoice dashboard',
-      path: '/app/invoice/dashboard',
+      path: '/app/transaksi/dashboard',
       component: () => import('@/views/apps/invoice/MyDashboard.vue')
     },
     {
-      name: 'Invoice details',
-      path: '/app/invoice/details',
-      component: () => import('@/views/apps/invoice/DetailsPage.vue')
+      name: 'Transaksi Dashboard',
+      path: '/app/transaksi/buat',
+      component: () => import('@/views/apps/customer/BuatTransaksi.vue')
     },
     {
-      name: 'Invoice create',
-      path: '/app/invoice/create',
-      component: () => import('@/views/apps/invoice/CreatePage.vue')
+      name: 'OrderList',
+      path: '/app/transaksi/list',
+      component: () => import('@/views/apps/customer/OrderList.vue')
     },
-    {
-      name: 'Invoice Edit',
-      path: '/app/invoice/edit',
-      component: () => import('@/views/apps/invoice/EditPage.vue')
-    },
+// ==================================== Akhir Transaksi List
     {
       name: 'UserProfile',
       path: '/app/user/userprofile',
