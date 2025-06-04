@@ -16,20 +16,20 @@ const userName = computed(() => {
 });
 
 // Fungsi navigasi ke profile3
-const goToProfile3 = () => {
-  router.push('/app/user/account-profile/profile3');
+const goToProfile = () => {
+  router.push('/app/akun/profil');
 };
 
 const profiledata1 = ref([
   {
     title: 'Edit profile',
     icon: 'custom-edit',
-    action: goToProfile3
+    action: goToProfile
   },
   {
     title: 'View Profile',
     icon: 'custom-user-1',
-    action: goToProfile3
+    action: goToProfile
   },
   {
     title: 'Social Profile',

@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
 import { useCartStore } from '@/stores/cart';
+import { tambahKeranjang, type KeranjangData } from '@/stores/apps/keranjang/keranjangUserHaha';
 import type { Product } from '@/stores/products';
 
 const props = defineProps<{
@@ -22,7 +23,9 @@ const emit = defineEmits<{
 
 const cartStore = useCartStore();
 const successsnackbar = ref(false);
-const successsnackbar2 = ref(false);
+const errorsnackbar = ref(false);
+const errorMessage = ref('');
+const isAddingToCart = ref(false);
 const rate = ref(props.rating);
 
 // Computed
@@ -33,14 +36,14 @@ const cartQuantity = computed(() => {
   return cartItem ? cartItem.quantity : 0;
 });
 
-const formattedPrice = computed(() => {
-  return new Intl.NumberFormat('id-ID', {
+const formattedPrice = computed(() =>
+  new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(props.salePrice);
-});
+    maximumFractionDigits: 0,
+  }).format(props.salePrice)
+);
 
 const formattedOfferPrice = computed(() => {
   if (!props.offerPrice) return null;
@@ -48,7 +51,7 @@ const formattedOfferPrice = computed(() => {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   }).format(props.offerPrice);
 });
 
@@ -67,21 +70,37 @@ const stockColor = computed(() => {
 // Methods
 function toggleWishlist() {
   emit('handlewishlist', props.product);
-  successsnackbar2.value = true;
 }
 
-function addToCart() {
-  if (props.product.stok > 0) {
+async function addToCart() {
+  if (props.product.stok <= 0 || isAddingToCart.value) return;
+
+  try {
+    isAddingToCart.value = true;
+
+    const keranjangData: KeranjangData = {
+      barang_id: props.product.id,
+      jumlah: 1,
+    };
+
+    await tambahKeranjang(keranjangData);
+
     emit('handlecart', props.product);
     successsnackbar.value = true;
-  }
-}
+  } catch (error: any) {
+    console.error('Error adding to cart:', error);
 
-function updateCartQuantity(newQuantity: number) {
-  if (newQuantity === 0) {
-    cartStore.removeFromCart(props.product.id);
-  } else {
-    cartStore.updateQuantity(props.product.id, newQuantity);
+    if (error.response?.data?.message) {
+      errorMessage.value = error.response.data.message;
+    } else if (error.message) {
+      errorMessage.value = error.message;
+    } else {
+      errorMessage.value = 'Gagal menambahkan ke keranjang';
+    }
+
+    errorsnackbar.value = true;
+  } finally {
+    isAddingToCart.value = false;
   }
 }
 </script>
@@ -97,22 +116,22 @@ function updateCartQuantity(newQuantity: number) {
           cover
           class="product-image"
         >
-          <template v-slot:placeholder>
+          <template #placeholder>
             <div class="d-flex align-center justify-center fill-height">
-              <v-progress-circular indeterminate color="primary"></v-progress-circular>
+              <v-progress-circular indeterminate color="primary" />
             </div>
           </template>
         </v-img>
       </router-link>
-      
+
       <!-- Wishlist Button -->
-      <v-btn 
-        icon 
-        color="secondary" 
-        aria-label="wishlist" 
-        variant="text" 
-        class="wishlist-icon" 
-        rounded="md" 
+      <v-btn
+        icon
+        color="secondary"
+        aria-label="wishlist"
+        variant="text"
+        class="wishlist-icon"
+        rounded="md"
         @click="toggleWishlist"
       >
         <SvgSprite
@@ -133,8 +152,8 @@ function updateCartQuantity(newQuantity: number) {
       </v-chip>
     </div>
 
-    <v-divider></v-divider>
-    
+    <v-divider />
+
     <v-card-item class="pb-2 px-4 pt-3">
       <v-card-title class="text-h5 pa-0">{{ name }}</v-card-title>
       <p class="text-lightText mb-2 text-body-2">{{ product.merek }}</p>
@@ -146,22 +165,22 @@ function updateCartQuantity(newQuantity: number) {
         <div>
           <div class="d-flex align-center flex-wrap">
             <h4 class="text-h5 mb-0">{{ formattedPrice }}</h4>
-            <p 
-              v-if="formattedOfferPrice" 
+            <p
+              v-if="formattedOfferPrice"
               class="text-decoration-line-through text-lightText text-body-2 mb-0 ms-2"
             >
               {{ formattedOfferPrice }}
             </p>
           </div>
-          
+
           <div class="text-medium-emphasis align-center d-flex ga-2 mb-2">
-            <v-rating 
-              color="inputBorder" 
-              active-color="warning" 
-              half-increments 
-              size="small" 
-              v-model="rate" 
-              density="compact" 
+            <v-rating
+              color="inputBorder"
+              active-color="warning"
+              half-increments
+              size="small"
+              v-model="rate"
+              density="compact"
               readonly
             />
             <small>({{ rating }}+)</small>
@@ -172,50 +191,31 @@ function updateCartQuantity(newQuantity: number) {
           </div>
         </div>
 
-        <!-- Cart Controls -->
-        <div class="d-flex align-center ga-2">
-          <div v-if="isInCart" class="d-flex align-center ga-1">
-            <v-btn
-              icon
-              size="small"
-              variant="outlined"
-              color="primary"
-              @click="updateCartQuantity(cartQuantity - 1)"
-              :disabled="cartQuantity <= 1"
-            >
-              <v-icon size="16">mdi-minus</v-icon>
-            </v-btn>
-            <span class="px-2 text-body-2">{{ cartQuantity }}</span>
-            <v-btn
-              icon
-              size="small"
-              variant="outlined"
-              color="primary"
-              @click="updateCartQuantity(cartQuantity + 1)"
-              :disabled="cartQuantity >= product.stok"
-            >
-              <v-icon size="16">mdi-plus</v-icon>
-            </v-btn>
-          </div>
-          
-          <v-btn
-            v-else
-            icon
-            rounded="md"
-            color="primary"
-            aria-label="cart"
-            variant="flat"
-            size="small"
-            @click="addToCart"
-            :disabled="product.stok <= 0"
-          >
-            <SvgSprite name="custom-shopping-cart" style="width: 18px; height: 18px" />
-          </v-btn>
-        </div>
+        <!-- Cart Button dengan loading state -->
+        <v-btn
+          icon
+          rounded="md"
+          color="primary"
+          aria-label="cart"
+          variant="flat"
+          size="small"
+          @click="addToCart"
+          :disabled="product.stok <= 0 || isAddingToCart"
+          :loading="isAddingToCart"
+        >
+          <SvgSprite
+            v-if="!isAddingToCart"
+            name="custom-shopping-cart"
+            style="width: 18px; height: 18px"
+          />
+          <v-tooltip activator="parent" location="top">
+            {{ isInCart ? `Sudah di keranjang (${cartQuantity})` : 'Tambahkan ke keranjang' }}
+          </v-tooltip>
+        </v-btn>
       </div>
     </v-card-text>
 
-    <!-- Success Snackbars -->
+    <!-- Cart Success Snackbar -->
     <v-snackbar
       variant="flat"
       location="top right"
@@ -232,19 +232,20 @@ function updateCartQuantity(newQuantity: number) {
       </div>
     </v-snackbar>
 
+    <!-- Cart Error Snackbar -->
     <v-snackbar
       variant="flat"
       location="top right"
       min-width="100"
-      color="success"
+      color="error"
       rounded="md"
       class="text-surface"
-      v-model="successsnackbar2"
-      timeout="3000"
+      v-model="errorsnackbar"
+      timeout="5000"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2" size="small">mdi-check-circle-outline</v-icon>
-        {{ isInWishlist ? 'Ditambahkan ke favorit' : 'Dihapus dari favorit' }}
+        <v-icon class="me-2" size="small">mdi-alert-circle-outline</v-icon>
+        {{ errorMessage }}
       </div>
     </v-snackbar>
   </v-card>

@@ -1,26 +1,28 @@
-// src/utils/helpers/fetch-wrapper.ts
 import { useAuthStore } from '@/stores/auth';
 
 export const fetchWrapper = {
-  get: request('GET'),
-  post: request('POST'),
-  put: request('PUT'),
-  delete: request('DELETE')
+  get: request<'GET'>('GET'),
+  post: request<'POST'>('POST'),
+  put: request<'PUT'>('PUT'),
+  delete: request<'DELETE'>('DELETE'),
 };
 
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
 interface RequestOptions {
-  method: string;
+  method: HttpMethod;
   headers: Record<string, string>;
   body?: string;
 }
 
-function request(method: string) {
-  return async (url: string, body?: object) => {
+// Fungsi pembungkus untuk request dengan method tertentu
+function request<M extends HttpMethod>(method: M) {
+  return async <T = unknown>(url: string, body?: object): Promise<T> => {
     const headers = getAuthHeader(url);
 
     const requestOptions: RequestOptions = {
       method,
-      headers
+      headers,
     };
 
     if (body) {
@@ -29,11 +31,11 @@ function request(method: string) {
     }
 
     const response = await fetch(url, requestOptions);
-    return handleResponse(response);
+    return handleResponse<T>(response);
   };
 }
 
-// Auth Header helper
+// Mendapatkan Authorization header jika token tersedia
 function getAuthHeader(url: string): Record<string, string> {
   try {
     const authStore = useAuthStore();
@@ -43,27 +45,31 @@ function getAuthHeader(url: string): Record<string, string> {
     if (token && isApiUrl) {
       return { Authorization: `Bearer ${token}` };
     }
-  } catch (e) {
+  } catch {
+    // ignore error, auth store belum tersedia
   }
   return {};
 }
 
-function handleResponse<T = any>(response: Response): Promise<T> {
-  return response.text().then((text: string) => {
-    const json = text ? JSON.parse(text) : null;
+// Handler untuk response, termasuk auto-logout saat 401/403
+async function handleResponse<T = unknown>(response: Response): Promise<T> {
+  const text = await response.text();
+  const json = text ? JSON.parse(text) : null;
 
-    if (!response.ok) {
+  if (!response.ok) {
+    try {
       const authStore = useAuthStore();
-
       if ([401, 403].includes(response.status) && authStore.user) {
         authStore.logout();
       }
-
-      const error: string = json?.message || response.statusText;
-      return Promise.reject(error);
+    } catch {
+      // ignore error, auth store belum tersedia
     }
 
-    // Return 'data' property dari API response
-    return json?.data;
-  });
+    const errorMessage: string = json?.message || response.statusText;
+    return Promise.reject(new Error(errorMessage));
+  }
+
+  // Return langsung json.data jika API response memiliki properti data
+  return json?.data as T;
 }

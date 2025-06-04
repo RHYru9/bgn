@@ -3,8 +3,6 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRatingStore } from '@/stores/apps/ranting';
 import { useAuthStore } from '@/stores/auth';
-import { useBarangStore } from '@/stores/apps/barang';
-import SvgSprite from '@/components/shared/SvgSprite.vue';
 
 // Get barangId from route params
 const route = useRoute();
@@ -17,7 +15,6 @@ const barangId = computed(() => {
 // Stores
 const ratingStore = useRatingStore();
 const authStore = useAuthStore();
-const barangStore = useBarangStore();
 
 // State
 const newComment = ref('');
@@ -60,14 +57,11 @@ const ratingDistribution = computed(() => {
   return distribution;
 });
 
-const productName = computed(() => {
-  return barangStore.getNamaBarangById(barangId.value);
-});
 
 // Methods
 const fetchProductReviews = async () => {
   if (!barangId.value) return;
-  
+
   loading.value = true;
   try {
     await ratingStore.fetchRatings();

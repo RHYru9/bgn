@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
-import { useCustomizerStore } from '../../../stores/customizer';
-import Logo from '../logo/LogoMain.vue';
-// dropdown imports
-import LanguageDD from '../vertical-header/LanguageDD.vue';
-import NotificationDD from '../vertical-header/NotificationDD.vue';
-import ProfileDD from '../vertical-header/ProfileDD.vue';
-import MegaMenuDD from '../vertical-header/MegaMenuDD.vue';
-import Searchbar from '../vertical-header/SearchBarPanel.vue';
+import { useCustomizerStore } from '../../../../stores/customizer';
 
 // assets
 import message1 from '@/assets/images/widget/message/message1.svg';
@@ -17,6 +10,13 @@ import message3 from '@/assets/images/widget/message/message3.svg';
 import message4 from '@/assets/images/widget/message/message4.svg';
 
 const messagedrawer = ref(false);
+
+// dropdown imports
+import NotificationDD from './NotificationDD.vue';
+import ProfileDD from './ProfileDD.vue';
+import MegaMenuDD from './MegaMenuDD.vue';
+import Searchbar from './SearchBarPanel.vue';
+import type { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 
 const customizer = useCustomizerStore();
 const priority = ref(customizer.isHorizontalLayout ? 0 : 0);
@@ -28,9 +28,17 @@ watch(priority, (newPriority) => {
 
 <template>
   <v-app-bar elevation="0" :priority="priority" height="74" class="px-sm-10 px-5">
-    <div class="py-5 pe-16 hidden-md-and-down">
-      <Logo />
-    </div>
+    <v-btn
+      class="hidden-md-and-down me-5 ms-0"
+      color="secondary"
+      icon
+      aria-label="sidebar button"
+      rounded="sm"
+      variant="tonal"
+      @click.stop="customizer.SET_MINI_SIDEBAR(!customizer.miniSidebar)"
+    >
+      <SvgSprite name="custom-menu-outline" style="width: 24px; height: 24px" />
+    </v-btn>
     <v-btn
       class="hidden-lg-and-up text-secondary"
       color="darkText"
@@ -46,14 +54,14 @@ watch(priority, (newPriority) => {
     <!-- search mobile -->
     <v-menu :close-on-content-click="false" class="hidden-lg-and-up" offset="10, 0">
       <template v-slot:activator="{ props }">
-        <v-btn class="hidden-lg-and-up text-secondary ms-1" color="secondary" icon rounded="sm" variant="text" size="small" v-bind="props">
+        <v-btn class="hidden-lg-and-up ms-1" color="secondary" icon rounded="sm" variant="text" size="small" v-bind="props">
           <div class="text-lightText d-flex align-center">
             <SvgSprite name="custom-search" style="width: 16px; height: 16px" />
           </div>
         </v-btn>
       </template>
-      <v-sheet class="search-sheet v-col-12 pa-0" width="320">
-        <v-text-field persistent-placeholder placeholder="Search here.." color="primary" variant="solo" hide-details>
+      <v-sheet class="search-sheet v-col-12 pa-0" elevation="24" width="320" rounded="md">
+        <v-text-field persistent-placeholder placeholder="Search here.." rounded="md" color="primary" variant="solo" hide-details>
           <template v-slot:prepend-inner>
             <div class="text-lightText d-flex align-center">
               <SvgSprite name="custom-search" style="width: 16px; height: 16px" />
@@ -66,7 +74,7 @@ watch(priority, (newPriority) => {
     <!-- ---------------------------------------------- -->
     <!-- Search part -->
     <!-- ---------------------------------------------- -->
-    <v-sheet class="d-none d-lg-block bg-transparent" width="250">
+    <v-sheet color="transparent" class="d-none d-lg-block" width="224">
       <Searchbar />
     </v-sheet>
 
@@ -80,11 +88,12 @@ watch(priority, (newPriority) => {
     <!-- ---------------------------------------------- -->
     <!-- Messages -->
     <!-- ---------------------------------------------- -->
-    <v-menu :close-on-content-click="false" offset="10, 320">
+    <v-menu :close-on-content-click="false" offset="10, 380">
       <template v-slot:activator="{ props }">
         <v-btn
           icon
-          class="text-secondary hidden-sm-and-down d-lg-block d-none"
+          class="hidden-sm-and-down d-lg-block d-none"
+          aria-label="Megamenu"
           color="secondary"
           rounded="sm"
           variant="text"
@@ -100,16 +109,15 @@ watch(priority, (newPriority) => {
     <!-- ---------------------------------------------- -->
     <!-- translate -->
     <!-- ---------------------------------------------- -->
-    <v-menu :close-on-content-click="false" location="bottom" offset="6, 80">
+    <!-- <v-menu :close-on-content-click="false" location="bottom" offset="6, 80">
       <template v-slot:activator="{ props }">
-        <v-btn icon class="ms-sm-2 ms-1" color="secondary" rounded="sm" v-bind="props">
+        <v-btn icon class="ms-sm-2 ms-1" color="secondary" aria-label="language button" rounded="sm" v-bind="props">
           <SvgSprite name="custom-translation" />
         </v-btn>
       </template>
       <v-sheet rounded="md" width="200">
-        <LanguageDD />
       </v-sheet>
-    </v-menu>
+    </v-menu> -->
 
     <!-- ---------------------------------------------- -->
     <!-- Notification -->
@@ -119,7 +127,14 @@ watch(priority, (newPriority) => {
     <!-- ---------------------------------------------- -->
     <!-- Message -->
     <!-- ---------------------------------------------- -->
-    <v-btn icon class="ms-sm-2 ms-1" color="secondary" rounded="sm" @click.stop="(messagedrawer = !messagedrawer)">
+    <v-btn
+      icon
+      class="ms-sm-2 ms-1"
+      aria-label="message button"
+      color="secondary"
+      rounded="sm"
+      @click.stop="(messagedrawer = !messagedrawer)"
+    >
       <SvgSprite name="custom-message-note" />
     </v-btn>
 
@@ -128,7 +143,7 @@ watch(priority, (newPriority) => {
     <!-- ---------------------------------------------- -->
     <v-menu :close-on-content-click="false" offset="8, 0">
       <template v-slot:activator="{ props }">
-        <v-btn class="profileBtn me-0" variant="text" rounded="circle" icon v-bind="props">
+        <v-btn class="profileBtn me-0" aria-label="profile" variant="text" rounded="circle" icon v-bind="props">
           <v-avatar class="py-2" size="40" rounded="circle">
             <img src="@/assets/images/users/avatar-6.png" class="rounded-circle" alt="profile" />
           </v-avatar>
@@ -139,6 +154,7 @@ watch(priority, (newPriority) => {
       </v-sheet>
     </v-menu>
   </v-app-bar>
+
   <v-navigation-drawer
     app
     temporary
@@ -159,6 +175,7 @@ watch(priority, (newPriority) => {
               variant="text"
               :color="customizer.actTheme === 'dark' ? 'lightText' : 'secondary'"
               icon
+              aria-label="close"
               rounded="md"
               @click="(messagedrawer = !messagedrawer)"
             >
@@ -167,6 +184,7 @@ watch(priority, (newPriority) => {
           </div>
         </v-col>
       </v-row>
+
       <v-list class="px-5" aria-label="message list" aria-busy="true">
         <v-list-item-title class="text-h6 mb-2">Today</v-list-item-title>
         <v-list-item class="px-0">

@@ -174,7 +174,7 @@ const createRating = async () => {
       rating: form.value.create.rating,
       komentar: form.value.create.komentar
     });
-    
+
     await fetchRatings();
     dialog.value.create = false;
     resetCreateForm();

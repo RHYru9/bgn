@@ -36,6 +36,11 @@ const PublicRoutes = {
       component: () => import('@/views/pages/landingpage/ProductPage.vue')
     },
     {
+      name: 'Product Checkout',
+      path: '/ecommerce/checkout',
+      component: () => import('@/components/apps/ecommerce/cart/CartCheckout.vue'),
+    },
+    {
       name: 'FAQs',
       path: '/faq',
       component: () => import('@/views/pages/landingpage/FAQs.vue')
@@ -53,7 +58,7 @@ const PublicRoutes = {
     {
       name: 'Produk Detail',
       path: '/produk/detail/:id',
-      component: () => import('@/views/apps/ecommerce/ProductDetail.vue')
+      component: () => import('@/views/apps/eCommerce/ProductDetail.vue')
     },
     {
       name: 'Forgot Password 2',

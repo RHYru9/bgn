@@ -4,6 +4,7 @@ import PublicRoutes from './PublicRoutes';
 import ComponentRoutes from './ComponentRoutes';
 import { useAuthStore } from '@/stores/auth';
 import { useUIStore } from '@/stores/ui';
+import userRoutes from './userRoutes';
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +15,7 @@ export const router = createRouter({
     },
     PublicRoutes,
     MainRoutes,
+    userRoutes,
     ComponentRoutes
   ]
 });
@@ -26,13 +28,11 @@ router.beforeEach(async (to, from, next) => {
   const publicPages = ['/login'];
   const authRequired = !publicPages.includes(to.path) && to.matched.some((record) => record.meta.requiresAuth);
 
-  // Redirect ke login jika halaman butuh autentikasi dan belum login
   if (authRequired && !auth.user) {
     auth.returnUrl = to.fullPath;
     return next('/login');
   }
 
-  // Jika user login dan membuka /login, tetap biarkan (tidak redirect otomatis)
   next();
 });
 

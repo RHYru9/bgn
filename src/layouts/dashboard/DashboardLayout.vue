@@ -5,8 +5,6 @@ import { RouterView } from 'vue-router';
 import LoaderWrapper from './LoaderWrapper.vue';
 import VerticalSidebarVue from './vertical-sidebar/VerticalSidebar.vue';
 import VerticalHeaderVue from './vertical-header/VerticalHeader.vue';
-import HorizontalHeader from './horizontal-header/HorizontalHeader.vue';
-import HorizontalSidebar from './horizontal-sidebar/HorizontalSidebar.vue';
 import Customizer from './customizer/CustomizerPanel.vue';
 import FooterPanel from './footer/FooterPanel.vue';
 import { useCustomizerStore } from '../../stores/customizer';
@@ -60,8 +58,6 @@ const getStyleObject = () => {
       <Customizer />
       <VerticalSidebarVue v-if="!customizer.isHorizontalLayout" />
       <VerticalHeaderVue v-if="!customizer.isHorizontalLayout" />
-      <HorizontalHeader v-if="customizer.isHorizontalLayout" />
-      <HorizontalSidebar v-if="customizer.isHorizontalLayout" />
       <v-main class="page-wrapper">
         <v-container fluid>
           <div :class="customizer.boxed ? 'maxWidth' : ''">

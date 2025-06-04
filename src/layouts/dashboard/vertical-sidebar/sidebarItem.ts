@@ -78,11 +78,6 @@ const sidebarItem: menu[] = [
         to: '/ecommerce/add-product'
       },
       {
-        id: 'checkout',
-        title: 'Checkout',
-        to: '/ecommerce/checkout'
-      },
-      {
         id: 'kategori-list',
         title: 'List Kategori',
         to: '/ecommerce/kategori/list'
@@ -111,6 +106,7 @@ const sidebarItem: menu[] = [
     }
     ]
   }
+// end sidebar admin
 ];
 
 export default sidebarItem;

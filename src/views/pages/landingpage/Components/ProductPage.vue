@@ -5,66 +5,176 @@ import ProductEmpty from '@/components/apps/ecommerce/listing/ProductEmplty.vue'
 import FloatingCart from '@/components/apps/ecommerce/cart/FloatingCart.vue';
 import { useBarangStore } from '@/stores/apps/barang';
 import { useCartStore } from '@/stores/cart';
+import { useWishlistStore } from '@/stores/apps/wishlist';
+
+// Type definitions
+interface Product {
+  id: number;
+  kode_barang: string;
+  nama_barang: string;
+  harga_jual: string | number;
+  deskripsi: string;
+  gambar_barang?: string;
+  kategori?: {
+    nama_kategori: string;
+  };
+}
+
+interface CartItem {
+  id: number;
+  kode_barang: string;
+  nama_barang: string;
+  harga_jual: string | number;
+  quantity: number;
+  gambar_barang?: string;
+}
+
+interface WishlistItem {
+  id: number;
+  barang_id: number;
+}
+
+interface Kategori {
+  nama_kategori: string;
+}
+
+interface SelectItem {
+  title: string;
+  value: string;
+}
 
 const barangStore = useBarangStore();
 const cartStore = useCartStore();
+const wishlistStore = useWishlistStore();
 
-const selectedCategory = ref('all');
-const priceRange = ref([0, 1000000000]);
-const currentPage = ref(1);
-const itemsPerPage = 16;
+const selectedCategory = ref<string>('all');
+const priceRange = ref<[number, number]>([0, 1000000000]);
+const currentPage = ref<number>(1);
+const itemsPerPage: number = 8;
 
-onMounted(async () => {
-  cartStore.loadFromStorage();
-  await barangStore.ambilSemuaBarang();
-  await barangStore.ambilKategori();
+// Snackbar states
+const snackbar = ref<boolean>(false);
+const snackbarText = ref<string>('');
+const snackbarColor = ref<string>('success');
+
+onMounted(async (): Promise<void> => {
+  try {
+    cartStore.loadFromStorage();
+    await barangStore.ambilSemuaBarang();
+    await barangStore.ambilKategori();
+    await wishlistStore.fetchWishlist();
+  } catch (error) {
+    console.error('Error loading data:', error);
+    showSnackbar('Gagal memuat data', 'error');
+  }
 });
 
-const kategori = computed(() => {
-  return barangStore.kategoriList.map(k => k.nama_kategori);
+const kategori = computed((): string[] => {
+  return barangStore.kategoriList.map((k: Kategori) => k.nama_kategori);
 });
 
-const filteredProducts = computed(() => {
+const categoryItems = computed((): SelectItem[] => {
+  return [
+    { title: 'Semua Kategori', value: 'all' },
+    ...kategori.value.map((k: string) => ({ title: k, value: k }))
+  ];
+});
+
+const filteredProducts = computed((): Product[] => {
   if (!barangStore.barangList.length) return [];
-  return barangStore.barangList.filter(barang => {
+  return barangStore.barangList.filter((barang: Product) => {
     const kategoriNama = barang.kategori?.nama_kategori ?? '';
-    const harga = parseInt(barang.harga_jual);
+    const harga = parseInt(barang.harga_jual.toString());
     const inCategory = selectedCategory.value === 'all' || kategoriNama === selectedCategory.value;
     const inPriceRange = harga >= priceRange.value[0] && harga <= priceRange.value[1];
     return inCategory && inPriceRange;
   });
 });
 
-const paginatedProducts = computed(() => {
+const paginatedProducts = computed((): Product[] => {
   const start = (currentPage.value - 1) * itemsPerPage;
   return filteredProducts.value.slice(start, start + itemsPerPage);
 });
 
-const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage));
+const totalPages = computed((): number => Math.ceil(filteredProducts.value.length / itemsPerPage));
 
-function handleAddToCart(product: any) {
-  cartStore.addToCart({
+// Check if product is in wishlist
+const isInWishlist = (productId: number): boolean => {
+  return wishlistStore.wishlist.some((item: WishlistItem) => item.barang_id === productId);
+};
+
+function handleAddToCart(product: Product): void {
+  const cartItem: CartItem = {
     id: product.id,
     kode_barang: product.kode_barang,
     nama_barang: product.nama_barang,
     harga_jual: product.harga_jual,
     quantity: 1,
     gambar_barang: product.gambar_barang
-  });
+  };
+  cartStore.addToCart(cartItem);
+  showSnackbar('Produk ditambahkan ke keranjang');
 }
 
-function resetFilters() {
+async function handleToggleWishlist(product: Product): Promise<void> {
+  try {
+    const existingWishlistItem = wishlistStore.wishlist.find(
+      (item: WishlistItem) => item.barang_id === product.id
+    );
+    
+    if (existingWishlistItem) {
+      // Remove from wishlist if already exists
+      await wishlistStore.removeFromWishlist(existingWishlistItem.id);
+      showSnackbar('Berhasil dihapus dari wishlist');
+    } else {
+      // Add to wishlist if not exists
+      await wishlistStore.addToWishlist(product.id);
+      showSnackbar('Ditambahkan ke wishlist');
+    }
+  } catch (error) {
+    console.error('Error toggling wishlist:', error);
+    showSnackbar('Gagal memproses wishlist', 'error');
+  }
+}
+
+function showSnackbar(message: string, color: string = 'success'): void {
+  snackbarText.value = message;
+  snackbarColor.value = color;
+  snackbar.value = true;
+}
+
+function resetFilters(): void {
   selectedCategory.value = 'all';
   priceRange.value = [0, 1000000];
   currentPage.value = 1;
 }
 
-function formatPrice(price: number) {
+function formatPrice(price: number): string {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0
   }).format(price);
+}
+
+function onCategoryChange(): void {
+  currentPage.value = 1;
+}
+
+function onPriceRangeEnd(): void {
+  currentPage.value = 1;
+}
+
+function goToPreviousPage(): void {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+}
+
+function goToNextPage(): void {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
 }
 
 watchEffect(() => {
@@ -87,16 +197,13 @@ watchEffect(() => {
             <v-col cols="12" md="6" class="pe-md-3">
               <v-select
                 v-model="selectedCategory"
-                :items="[
-                  { title: 'Semua Kategori', value: 'all' },
-                  ...kategori.map(k => ({ title: k, value: k }))
-                ]"
+                :items="categoryItems"
                 label="Kategori"
                 variant="outlined"
                 density="compact"
                 hide-details
                 prepend-inner-icon="mdi-tag-outline"
-                @update:model-value="() => currentPage = 1"
+                @update:model-value="onCategoryChange"
               >
                 <template v-slot:selection="{ item }">
                   <span class="text-truncate">{{ item.title }}</span>
@@ -118,10 +225,10 @@ watchEffect(() => {
                   track-color="grey-lighten-2"
                   thumb-label="persistent"
                   hide-details
-                  @end="() => currentPage = 1"
+                  @end="onPriceRangeEnd"
                 >
                   <template v-slot:thumb-label="{ modelValue }">
-                    <span class="text-caption">{{ Math.round(modelValue / 1000) }}K</span>
+                    <span class="text-caption">{{ Math.round(Number(modelValue) / 1000) }}K</span>
                   </template>
                 </v-range-slider>
               </div>
@@ -198,12 +305,13 @@ watchEffect(() => {
                 :name="product.nama_barang"
                 :image="product.gambar_barang ? `http://127.0.0.1:8000/${product.gambar_barang}` : 'https://via.placeholder.com/300x300?text=No+Image'"
                 :desc="product.deskripsi"
-                :salePrice="parseInt(product.harga_jual)"
+                :salePrice="parseInt(product.harga_jual.toString())"
                 :rating="5"
                 :goto="product.id"
                 :product="product"
+                :isWishlisted="isInWishlist(product.id)"
                 @handlecart="handleAddToCart"
-                @handlewishlist="() => {}"
+                @handlewishlist="handleToggleWishlist"
               />
             </v-col>
           </v-row>
@@ -216,7 +324,7 @@ watchEffect(() => {
               :disabled="currentPage === 1"
               variant="outlined"
               size="small"
-              @click="currentPage--"
+              @click="goToPreviousPage"
               class="me-2"
             >
               <v-icon size="small">mdi-chevron-left</v-icon>
@@ -233,16 +341,42 @@ watchEffect(() => {
               :disabled="currentPage === totalPages"
               variant="outlined"
               size="small"
-              @click="currentPage++"
+              @click="goToNextPage"
               class="ms-2"
             >
               <span class="d-none d-sm-inline me-1">Selanjutnya</span>
               <v-icon size="small">mdi-chevron-right</v-icon>
             </v-btn>
           </div>
+
+          <!-- Jelajahi Semua Produk Link -->
+          <div class="text-center mt-8 mb-6">
+            <router-link to="/produk" class="explore-all-link">
+              <span class="text-h6 text-primary">Jelajahi Semua Produk</span>
+              <v-icon color="primary" class="ms-2">mdi-arrow-right</v-icon>
+            </router-link>
+          </div>
         </v-col>
       </v-row>
     </v-container>
+
+    <!-- Snackbar Notification -->
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+      location="bottom right"
+    >
+      {{ snackbarText }}
+      <template v-slot:actions>
+        <v-btn
+          variant="text"
+          @click="snackbar = false"
+        >
+          Tutup
+        </v-btn>
+      </template>
+    </v-snackbar>
 
     <FloatingCart />
   </section>
@@ -259,6 +393,24 @@ watchEffect(() => {
 
 .product-section {
   min-height: 60vh;
+}
+
+.explore-all-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  padding: 12px 24px;
+  border-radius: 8px;
+}
+
+.explore-all-link:hover {
+  background-color: rgba(var(--v-theme-primary), 0.08);
+  transform: translateY(-2px);
+}
+
+.explore-all-link:hover .text-h6 {
+  text-decoration: underline;
 }
 
 @media (max-width: 960px) {
