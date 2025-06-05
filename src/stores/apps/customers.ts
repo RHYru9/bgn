@@ -21,6 +21,7 @@ interface Transaction {
   tanggal_pesanan: string;
   total_harga: string;
   status_pembayaran: string;
+  id_barang: number;
   status_pengiriman: string;
   jenis_pengiriman: string;
   metode_pembayaran: string;
@@ -202,7 +203,6 @@ export const useCustomers = defineStore('customers', {
       }
     },
 
-    // Transaction management methods
     async fetchTransactions() {
       try {
         this.loading = true;
@@ -215,7 +215,6 @@ export const useCustomers = defineStore('customers', {
           }
         });
         
-        // API returns either array directly or data property with array
         this.transactions = Array.isArray(response.data) ? response.data : (response.data.data || []);
         this.loading = false;
       } catch (error: any) {

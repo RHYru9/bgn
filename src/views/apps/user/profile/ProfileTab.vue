@@ -13,7 +13,6 @@ const textKodePos = ref<string>();
 
 onMounted(() => {
   if (authStore.user) {
-    // Sesuaikan dengan key dari response API
     textNama.value = authStore.user.nama;
     textEmail.value = authStore.user.email;
     textAlamat.value = authStore.user.alamat;

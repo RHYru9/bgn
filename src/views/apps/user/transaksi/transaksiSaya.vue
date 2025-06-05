@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useCustomers } from '@/stores/apps/customers';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
+import PrintInvoice from '@/views/apps/user/transaksi/invoice/Dashboard/PrintInvoice.vue';
 import type { Header } from 'vue3-easy-data-table';
 import 'vue3-easy-data-table/dist/style.css';
+// Import html2pdf
+import html2pdf from 'html2pdf.js';
 
-// Definisikan tipe untuk transaksi
 interface Transaction {
   id: number;
   kode_transaksi: string;
@@ -53,19 +55,27 @@ const themeColor = ref('rgb(var(--v-theme-primary))');
 
 // Dialog control
 const viewDialog = ref(false);
+const printDialog = ref(false);
 const selectedTransaction = ref<Transaction | null>(null);
 
 // Loading states
 const loading = ref(false);
+const isPrinting = ref(false);
+const isGeneratingPDF = ref(false);
+
+// Reference to PrintInvoice component
+const printInvoiceRef = ref(null);
 
 const headers: Header[] = [
   { text: 'ID', value: 'id', sortable: true },
+  { text: 'Barang', value: 'barang.nama_barang', sortable: true },
   { text: 'Resi', value: 'kode_transaksi', sortable: true },
   { text: 'Tanggal Pesanan', value: 'tanggal_pesanan', sortable: true },
   { text: 'Total Terbilang', value: 'total_harga', sortable: true },
   { text: 'Status Pembayaran', value: 'status_pembayaran', sortable: true },
   { text: 'Status Pengiriman', value: 'status_pengiriman', sortable: true },
   { text: 'Metode Pembayaran', value: 'metode_pembayaran', sortable: true },
+  { text: 'Barang', value: 'jumlah', sortable: true },
   { text: 'Aksi', value: 'operation' }
 ];
 
@@ -115,7 +125,6 @@ const getPengirimanStatusColor = (status: string) => {
   }
 };
 
-// Function to open view dialog
 const openViewDialog = async (id: number) => {
   try {
     loading.value = true;
@@ -127,6 +136,126 @@ const openViewDialog = async (id: number) => {
   } finally {
     loading.value = false;
   }
+};
+
+const openPrintDialog = async (id: number) => {
+  try {
+    loading.value = true;
+    const transaction = await store.getTransactionById(id);
+    selectedTransaction.value = transaction;
+    printDialog.value = true;
+  } catch (error) {
+    console.error('Gagal memuat detail transaksi:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handlePrint = async () => {
+  if (!selectedTransaction.value) return;
+  
+  try {
+    isPrinting.value = true;
+    await nextTick();
+    
+    const printContent = document.querySelector('.print-invoice-content');
+    
+    if (printContent) {
+      // Create a clone of the print content
+      const printClone = printContent.cloneNode(true) as HTMLElement;
+      
+      // Create print styles
+      const printStyles = `
+        <style>
+          @page { size: auto; margin: 5mm; }
+          body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+          .no-print { display: none !important; }
+          .print-only { display: block !important; }
+          .print-invoice-content { width: 100%; margin: 0; padding: 0; }
+        </style>
+      `;
+      
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      
+      if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Invoice - ${selectedTransaction.value.kode_transaksi}</title>
+              ${printStyles}
+            </head>
+            <body onload="window.print(); window.close();">
+              ${printClone.innerHTML}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      } else {
+        // Fallback if popup is blocked
+        const printSection = document.createElement('div');
+        printSection.innerHTML = printClone.innerHTML;
+        document.body.appendChild(printSection);
+        window.print();
+        document.body.removeChild(printSection);
+      }
+    }
+    
+    printDialog.value = false;
+  } catch (error) {
+    console.error('Error during printing:', error);
+    window.print();
+  } finally {
+    isPrinting.value = false;
+  }
+};
+
+const handlePrintToPDF = async () => {
+  if (!selectedTransaction.value) return;
+  
+  try {
+    isGeneratingPDF.value = true;
+    await nextTick();
+    
+    const printContent = document.querySelector('.print-invoice-content');
+    
+    if (printContent) {
+      // PDF configuration options
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `Invoice-${selectedTransaction.value.kode_transaksi}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          letterRendering: true,
+          logging: false
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      // Generate PDF
+      await html2pdf().set(opt).from(printContent).save();
+    }
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+  } finally {
+    isGeneratingPDF.value = false;
+  }
+};
+
+const handlePrintAll = () => {
+  window.print();
 };
 </script>
 
@@ -160,7 +289,14 @@ const openViewDialog = async (id: number) => {
 
             <v-col cols="12" md="3">
               <div class="d-flex ga-2 justify-end">
-                <v-btn icon variant="text" aria-label="print" rounded="md">
+                <v-btn 
+                  icon 
+                  variant="text" 
+                  aria-label="print-all" 
+                  rounded="md" 
+                  @click="handlePrintAll"
+                  :disabled="isPrinting || isGeneratingPDF"
+                >
                   <SvgSprite name="custom-printer-outline" style="width: 16px; height: 16px" />
                 </v-btn>
               </div>
@@ -219,8 +355,31 @@ const openViewDialog = async (id: number) => {
                   variant="text"
                   rounded="md"
                   @click="openViewDialog(id)"
+                  :disabled="loading"
                 >
                   <SvgSprite name="custom-eye" style="width: 18px; height: 18px" />
+                </v-btn>
+                <v-btn
+                  icon
+                  color="primary"
+                  aria-label="print"
+                  variant="text"
+                  rounded="md"
+                  @click="openPrintDialog(id)"
+                  :disabled="loading"
+                >
+                  <SvgSprite name="custom-printer-outline" style="width: 18px; height: 18px" />
+                </v-btn>
+                <v-btn
+                  icon
+                  color="success"
+                  aria-label="pdf"
+                  variant="text"
+                  rounded="md"
+                  @click="openPrintDialog(id)"
+                  :disabled="loading"
+                >
+                  <SvgSprite name="custom-file-pdf" style="width: 18px; height: 18px" />
                 </v-btn>
               </div>
             </template>
@@ -316,7 +475,7 @@ const openViewDialog = async (id: number) => {
               <div class="text-subtitle-1 mb-3">{{ selectedTransaction.catatan_pembeli }}</div>
             </v-col>
 
-            <!-- Order Items (if available) -->
+            <!-- Order Items -->
             <v-col cols="12" v-if="selectedTransaction.items && selectedTransaction.items.length > 0">
               <v-divider class="my-4" />
               <h6 class="text-h6 mb-3 text-primary">Item Pesanan</h6>
@@ -346,9 +505,125 @@ const openViewDialog = async (id: number) => {
       <v-divider />
       
       <v-card-actions class="px-4 pb-4">
+        <v-btn 
+          color="primary" 
+          variant="outlined" 
+          @click="openPrintDialog(selectedTransaction?.id || 0)"
+          :disabled="!selectedTransaction"
+        >
+          Preview & Cetak
+        </v-btn>
         <v-spacer></v-spacer>
-        <v-btn color="primary" variant="flat" @click="viewDialog = false">Tutup</v-btn>
+        <v-btn 
+          color="grey" 
+          variant="text" 
+          @click="viewDialog = false"
+        >
+          Tutup
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- Print Dialog -->
+  <v-dialog v-model="printDialog" fullscreen transition="dialog-bottom-transition">
+    <v-card v-if="printDialog" class="print-dialog-container">
+      <v-toolbar color="primary" dark class="no-print">
+        <v-btn icon @click="printDialog = false" size="large">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-toolbar-title>Preview Invoice</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn
+          variant="outlined"
+          @click="handlePrint"
+          :disabled="isPrinting || isGeneratingPDF"
+          :loading="isPrinting"
+          class="mr-2"
+        >
+          <v-icon left>mdi-printer</v-icon>
+          Cetak
+        </v-btn>
+        <v-btn
+          variant="outlined"
+          color="success"
+          @click="handlePrintToPDF"
+          :disabled="isPrinting || isGeneratingPDF"
+          :loading="isGeneratingPDF"
+          class="mr-2"
+        >
+          <v-icon left>mdi-file-pdf-box</v-icon>
+          Download PDF
+        </v-btn>
+        <v-btn
+          variant="outlined"
+          @click="printDialog = false"
+          :disabled="isPrinting || isGeneratingPDF"
+        >
+          <v-icon left>mdi-close</v-icon>
+          Tutup
+        </v-btn>
+      </v-toolbar>
+      
+      <v-card-text class="pa-0 print-content">
+        <PrintInvoice 
+          v-if="selectedTransaction"
+          ref="printInvoiceRef"
+          :transaction="selectedTransaction"
+          class="print-invoice-content"
+        />
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
+
+<style scoped>
+.print-dialog-container {
+  background: white;
+}
+
+.print-content {
+  background: white;
+  min-height: calc(100vh - 64px);
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-dialog-container, 
+  .print-dialog-container * {
+    visibility: visible;
+  }
+  .print-dialog-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-content {
+    min-height: 100vh;
+  }
+}
+
+.no-print {
+  display: block;
+}
+
+@media screen {
+  .print-dialog-container {
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+}
+
+.operation-wrapper {
+  min-width: 120px;
+}
+</style>

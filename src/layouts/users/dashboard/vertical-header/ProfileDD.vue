@@ -10,14 +10,16 @@ const authStore = useAuthStore();
 const customizer = useCustomizerStore();
 const router = useRouter();
 
-// Ambil nama dari user API
 const userName = computed(() => {
   return authStore.user?.nama || 'Guest';
 });
 
-// Fungsi navigasi ke profile3
 const goToProfile = () => {
   router.push('/app/akun/profil');
+};
+
+const goToBank = () => {
+  router.push('/app/bank');
 };
 
 const profiledata1 = ref([
@@ -32,42 +34,9 @@ const profiledata1 = ref([
     action: goToProfile
   },
   {
-    title: 'Social Profile',
-    icon: 'custom-users',
-    action: () => {}
-  },
-  {
-    title: 'Billing',
+    title: 'Akun Bank',
     icon: 'custom-wallet',
-    action: () => {}
-  }
-]);
-
-const profiledata2 = ref([
-  {
-    title: 'Support',
-    icon: 'custom-support',
-    action: () => {}
-  },
-  {
-    title: 'Account settings',
-    icon: 'custom-user-1',
-    action: () => {}
-  },
-  {
-    title: 'Privacy center',
-    icon: 'custom-lock',
-    action: () => {}
-  },
-  {
-    title: 'Feedback',
-    icon: 'custom-comment',
-    action: () => {}
-  },
-  {
-    title: 'History',
-    icon: 'custom-history',
-    action: () => {}
+    action: goToBank
   }
 ]);
 </script>
@@ -104,12 +73,6 @@ const profiledata2 = ref([
           <SvgSprite name="custom-user-outline" style="width: 18px; height: 18px" />
         </div>
         Profil
-      </v-tab>
-      <v-tab value="222">
-        <div class="v-icon--start">
-          <SvgSprite name="custom-setting-outline-1" style="width: 18px; height: 18px" />
-        </div>
-        Pengaturan
       </v-tab>
     </v-tabs>
 

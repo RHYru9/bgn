@@ -87,6 +87,8 @@ export interface PaymentMethod {
 // Interface untuk Data Transaksi
 export interface TransaksiData {
   tanggal_pesanan: string;
+  jumlah?: number;
+  id_barang: number;
   total_harga: string;
   status_pembayaran?: 'belum_bayar' | 'lunas' | 'cod_pending';
   status_pengiriman: string;
@@ -105,6 +107,8 @@ export interface TransaksiResponse {
   data: {
     kode_transaksi: string;
     user_id: number;
+    id_barang: number;
+    jumlah: number;
     tanggal_pesanan: string;
     total_harga: string;
     status_pembayaran: string;
@@ -324,6 +328,7 @@ export class KeranjangService {
       
       // Append semua data transaksi ke FormData
       formData.append('tanggal_pesanan', transaksiData.tanggal_pesanan);
+      formData.append('id_barang', transaksiData.id_barang.toString());
       formData.append('total_harga', transaksiData.total_harga);
       formData.append('status_pengiriman', transaksiData.status_pengiriman);
       formData.append('jenis_pengiriman', transaksiData.jenis_pengiriman);
@@ -332,6 +337,9 @@ export class KeranjangService {
       formData.append('kode_pos', transaksiData.kode_pos);
 
       // Optional fields
+      if (transaksiData.jumlah) {
+        formData.append('jumlah', transaksiData.jumlah.toString());
+      }
       if (transaksiData.status_pembayaran) {
         formData.append('status_pembayaran', transaksiData.status_pembayaran);
       }
@@ -528,6 +536,8 @@ export class KeranjangService {
 
     return {
       tanggal_pesanan: today.toISOString().split('T')[0],
+      jumlah: checkoutState.keranjangItems[0].jumlah,
+      id_barang: checkoutState.keranjangItems[0].barang.id,
       total_harga: checkoutState.totalHarga.toString(),
       status_pembayaran: statusPembayaran,
       status_pengiriman: 'dikirim',

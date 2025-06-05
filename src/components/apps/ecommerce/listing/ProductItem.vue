@@ -215,39 +215,6 @@ async function addToCart() {
       </div>
     </v-card-text>
 
-    <!-- Cart Success Snackbar -->
-    <v-snackbar
-      variant="flat"
-      location="top right"
-      min-width="100"
-      color="success"
-      rounded="md"
-      class="text-surface"
-      v-model="successsnackbar"
-      timeout="3000"
-    >
-      <div class="d-flex align-center">
-        <v-icon class="me-2" size="small">mdi-check-circle-outline</v-icon>
-        Berhasil ditambahkan ke keranjang
-      </div>
-    </v-snackbar>
-
-    <!-- Cart Error Snackbar -->
-    <v-snackbar
-      variant="flat"
-      location="top right"
-      min-width="100"
-      color="error"
-      rounded="md"
-      class="text-surface"
-      v-model="errorsnackbar"
-      timeout="5000"
-    >
-      <div class="d-flex align-center">
-        <v-icon class="me-2" size="small">mdi-alert-circle-outline</v-icon>
-        {{ errorMessage }}
-      </div>
-    </v-snackbar>
   </v-card>
 </template>
 

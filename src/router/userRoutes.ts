@@ -19,7 +19,7 @@ const userRoutes = {
     {
         name: 'Profile',
         path: '/app/akun/profil',
-        component: () => import('@/views/apps/user/profile/ProfilePage.vue')
+        component: () => import('@/views/apps/user/profile/UserProfilePage.vue')
     },
     {
         name: 'Security',
