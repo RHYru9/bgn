@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
 import { useAuthStore } from '@/stores/auth';
-import { Form } from 'vee-validate';
+import { Form, type SubmissionContext } from 'vee-validate';
 
 const checkbox = ref(false);
 const valid = ref(false);
@@ -12,47 +12,47 @@ const email = ref('');
 
 // Rules validasi password
 const passwordRules = ref([
-  (v: string) => !!v || 'Password is required',
-  (v: string) => v === v.trim() || 'Password cannot start or end with spaces',
-  (v: string) => v.length <= 20 || 'Password must be less than 20 characters'
+  (v: string) => !!v || 'Password wajib diisi',
+  (v: string) => v === v.trim() || 'Password tidak boleh diawali/diakhiri spasi',
+  (v: string) => v.length <= 20 || 'Password maksimal 20 karakter'
 ]);
 
 // Rules validasi email
 const emailRules = ref([
-  (v: string) => !!v.trim() || 'E-mail is required',
+  (v: string) => !!v.trim() || 'Email wajib diisi',
   (v: string) => {
     const trimmedEmail = v.trim();
-    return !/\s/.test(trimmedEmail) || 'E-mail must not contain spaces';
+    return !/\s/.test(trimmedEmail) || 'Email tidak boleh mengandung spasi';
   },
-  (v: string) => /.+@.+\..+/.test(v.trim()) || 'E-mail must be valid'
+  (v: string) => /.+@.+\..+/.test(v.trim()) || 'Email tidak valid'
 ]);
 
-function validate(values: any, { setErrors }: any) {
+function validate(values: Record<string, unknown>, { setErrors }: SubmissionContext) {
   const trimmedEmail = email.value.trim();
   email.value = trimmedEmail;
-
+  
   const authStore = useAuthStore();
-  return authStore.login(trimmedEmail, password.value).catch((error) => {
+  return authStore.login(trimmedEmail, password.value).catch((error: Error) => {
     // Tampilkan error API ke UI
-    setErrors({ apiError: error });
+    setErrors({ apiError: error.message });
   });
 }
 </script>
 
 <template>
   <div class="d-flex justify-space-between align-center mt-4">
-    <h3 class="text-h3 text-center mb-0">Login</h3>
-    <router-link to="/register1" class="text-primary text-decoration-none">
-      Don't Have an account?
+    <h3 class="text-h3 text-center mb-0">Masuk</h3>
+    <router-link to="/register" class="text-primary text-decoration-none">
+      Belum punya akun?
     </router-link>
   </div>
-
+  
   <Form @submit="validate" class="mt-7 loginForm" v-slot="{ errors, isSubmitting }">
     <!-- Email -->
     <div class="mb-6">
-      <v-label>Email Address</v-label>
+      <v-label>Alamat Email</v-label>
       <v-text-field
-        aria-label="email address"
+        aria-label="alamat email"
         v-model="email"
         :rules="emailRules"
         class="mt-2"
@@ -63,7 +63,7 @@ function validate(values: any, { setErrors }: any) {
         color="primary"
       ></v-text-field>
     </div>
-
+    
     <!-- Password -->
     <div>
       <v-label>Password</v-label>
@@ -87,24 +87,24 @@ function validate(values: any, { setErrors }: any) {
         </template>
       </v-text-field>
     </div>
-
-    <!-- Remember me + Forgot password -->
+    
+    <!-- Ingat saya + Lupa password -->
     <div class="d-flex align-center mt-4 mb-7 mb-sm-0">
       <v-checkbox
         v-model="checkbox"
-        :rules="[(v: any) => !!v || 'You must agree to continue!']"
-        label="Keep me signed in"
+        :rules="[(v: boolean) => !!v || 'Anda harus menyetujui untuk melanjutkan!']"
+        label="Ingat saya"
         required
         color="primary"
         class="ms-n2"
         hide-details
       ></v-checkbox>
       <div class="ms-auto">
-        <router-link to="/forgot-pwd1" class="text-darkText link-hover">Forgot Password?</router-link>
+        <router-link to="/lupa-password" class="text-darkText link-hover">Lupa Password?</router-link>
       </div>
     </div>
 
-    <!-- Submit button -->
+    <!-- Tombol submit -->
     <v-btn
       color="primary"
       :loading="isSubmitting"
@@ -116,10 +116,10 @@ function validate(values: any, { setErrors }: any) {
       :disabled="valid"
       type="submit"
     >
-      Login
+      Masuk
     </v-btn>
-
-    <!-- API error -->
+    
+    <!-- Error API -->
     <div v-if="errors.apiError" class="mt-2">
       <v-alert color="error">{{ errors.apiError }}</v-alert>
     </div>

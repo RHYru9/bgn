@@ -174,10 +174,10 @@ const handlePrint = async () => {
           .print-invoice-content { width: 100%; margin: 0; padding: 0; }
         </style>
       `;
-      
-      // Create a new window for printing
+
+
       const printWindow = window.open('', '_blank');
-      
+
       if (printWindow) {
         printWindow.document.open();
         printWindow.document.write(`
@@ -194,7 +194,7 @@ const handlePrint = async () => {
         `);
         printWindow.document.close();
       } else {
-        // Fallback if popup is blocked
+
         const printSection = document.createElement('div');
         printSection.innerHTML = printClone.innerHTML;
         document.body.appendChild(printSection);
@@ -202,7 +202,7 @@ const handlePrint = async () => {
         document.body.removeChild(printSection);
       }
     }
-    
+
     printDialog.value = false;
   } catch (error) {
     console.error('Error during printing:', error);
@@ -214,11 +214,11 @@ const handlePrint = async () => {
 
 const handlePrintToPDF = async () => {
   if (!selectedTransaction.value) return;
-  
+
   try {
     isGeneratingPDF.value = true;
     await nextTick();
-    
+
     const printContent = document.querySelector('.print-invoice-content');
     
     if (printContent) {

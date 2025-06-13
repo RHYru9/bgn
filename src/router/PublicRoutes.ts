@@ -16,11 +16,6 @@ const PublicRoutes = {
       component: () => import('@/views/authentication/LoginPage.vue')
     },
     {
-      name: 'recaptcha',
-      path: '/captcha',
-      component: () => import('@/views/authentication/LoginPage.vue')
-    },
-    {
       name: 'ContactUs',
       path: '/contact-us',
       component: () => import('@/views/pages/landingpage/ContactUs.vue')
@@ -46,29 +41,9 @@ const PublicRoutes = {
       component: () => import('@/views/pages/landingpage/FAQs.vue')
     },
     {
-      name: 'Login 2',
-      path: '/login2',
-      component: () => import('@/views/authentication/auth2/LoginPage2.vue')
-    },
-    {
-      name: 'Register 2',
-      path: '/register2',
-      component: () => import('@/views/authentication/auth2/RegisterPage2.vue')
-    },
-    {
       name: 'Produk Detail',
       path: '/produk/detail/:id',
       component: () => import('@/views/apps/eCommerce/ProductDetail.vue')
-    },
-    {
-      name: 'Forgot Password 2',
-      path: '/forgot-pwd2',
-      component: () => import('@/views/authentication/auth2/ForgotPwd2.vue')
-    },
-    {
-      name: 'Check Mail 2',
-      path: '/check-mail2',
-      component: () => import('@/views/authentication/auth2/CheckMail2.vue')
     },
     {
       name: 'Reset Password 2',
@@ -76,44 +51,29 @@ const PublicRoutes = {
       component: () => import('@/views/authentication/auth2/ResetPwd2.vue')
     },
     {
-      name: 'Code Verification 2',
-      path: '/code-verify2',
-      component: () => import('@/views/authentication/auth2/CodeVerification2.vue')
-    },
-    {
-      name: 'Authentication 3',
-      path: '/login3',
-      component: () => import('@/views/authentication/auth3/AuthenticationPage3.vue')
-    },
-    {
-      name: 'Login',
-      path: '/login1',
-      component: () => import('@/views/authentication/auth1/LoginPage1.vue')
-    },
-    {
       name: 'Register',
-      path: '/register1',
+      path: '/register',
       component: () => import('@/views/authentication/auth1/RegisterPage1.vue')
     },
     {
+      name: 'Verifikasi',
+      path: '/verifikasi',
+      component: () => import('@/views/authentication/auth2/verfikasiKode.vue')
+    },
+    {
       name: 'Forgot Password',
-      path: '/forgot-pwd1',
+      path: '/lupa-password',
       component: () => import('@/views/authentication/auth1/ForgotPwd1.vue')
     },
     {
       name: 'Check Mail',
-      path: '/check-mail1',
+      path: '/cek-email',
       component: () => import('@/views/authentication/auth1/CheckMail1.vue')
     },
     {
       name: 'Reset Password',
       path: '/reset-pwd1',
       component: () => import('@/views/authentication/auth1/ResetPwd1.vue')
-    },
-    {
-      name: 'Code Verification',
-      path: '/code-verify1',
-      component: () => import('@/views/authentication/auth1/CodeVerification1.vue')
     },
     {
       name: 'Profil Perusahaan',

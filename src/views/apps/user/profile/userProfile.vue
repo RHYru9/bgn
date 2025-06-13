@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import userAvatar from '@/assets/images/users/avatar-1.png'
 import { useAuthStore } from '@/stores/auth'
 import { useProfileStore } from '@/stores/apps/profile'
+import { useVerifikasiStore } from '@/stores/apps/sudahVerifikasi'
 import type { UpdateProfilePayload } from '@/types/user'
 
 const authStore = useAuthStore()
 const profileStore = useProfileStore()
+const verifikasiStore = useVerifikasiStore()
 
 const formData = ref<UpdateProfilePayload>({
   nama: '',
@@ -20,12 +22,20 @@ const isLoading = ref(false)
 const isSuccess = ref(false)
 const errorMessage = ref('')
 
-// Load initial data
+const isFormDisabled = computed(() => {
+  return isLoading.value || !verifikasiStore.isVerified
+})
+
 onMounted(async () => {
   try {
     isLoading.value = true
+
+    // Check verification status
+    await verifikasiStore.checkVerifikasi()
+
+    // Load profile data
     await profileStore.getProfile()
-    
+
     if (profileStore.user) {
       formData.value = {
         nama: profileStore.user.nama || '',
@@ -45,6 +55,12 @@ onMounted(async () => {
 
 // Handle update profile
 const handleUpdate = async () => {
+  // Cek verifikasi sebelum update
+  if (!verifikasiStore.isVerified) {
+    errorMessage.value = 'Anda harus memverifikasi akun terlebih dahulu sebelum dapat memperbarui profil'
+    return
+  }
+
   try {
     isLoading.value = true
     isSuccess.value = false
@@ -59,23 +75,16 @@ const handleUpdate = async () => {
       kode_pos: formData.value.kode_pos
     }
 
-
     const updatedUser = await profileStore.updateProfile(payload)
     
-    // Update auth store dengan data terbaru - periksa apakah method setUser ada
-    if (authStore.user && typeof authStore.setUser === 'function') {
-      const updatedAuthUser = { ...authStore.user, ...updatedUser }
-      authStore.setUser(updatedAuthUser)
-    } else if (authStore.user) {
-      // Jika setUser tidak ada, update langsung property user
-      Object.assign(authStore.user, updatedUser)
+    // Update auth store dengan data terbaru - update langsung property user
+    if (authStore.user && updatedUser) {
+      // Langsung update property user di auth store
+      authStore.user = { ...authStore.user, ...updatedUser }
     }
     
     isSuccess.value = true
     setTimeout(() => isSuccess.value = false, 3000)
-    
-    // Clear password field setelah berhasil update
-    formData.value.password = ''
     
   } catch (error) {
     console.error('Update profile error:', error)
@@ -98,16 +107,66 @@ const handleUpdate = async () => {
           <v-card-text class="text-center">
             <img :src="userAvatar" width="100" class="rounded-md" alt="foto profil" />
             <p class="text-subtitle-2 text-disabled font-weight-medium my-4">Unggah atau ganti foto profil Anda</p>
-            <v-btn color="primary" rounded="md" variant="flat" size="small">Unggah Avatar</v-btn>
+            <v-btn 
+              color="primary" 
+              rounded="md" 
+              variant="flat" 
+              size="small"
+              :disabled="!verifikasiStore.isVerified"
+            >
+              Unggah Avatar
+            </v-btn>
+          </v-card-text>
+        </v-card>
+      </v-card>
+      
+      <!-- Verification Status Card -->
+      <v-card variant="flat" rounded="lg" class="mt-4">
+        <v-card variant="outlined" rounded="lg">
+          <div class="pa-6">
+            <h5 class="text-subtitle-1 mb-0">Status Verifikasi</h5>
+          </div>
+          <v-divider></v-divider>
+          <v-card-text class="text-center">
+            <v-chip 
+              :color="verifikasiStore.isVerified ? 'success' : 'error'"
+              variant="tonal"
+              size="large"
+            >
+              <v-icon start>
+                {{ verifikasiStore.isVerified ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+              </v-icon>
+              {{ verifikasiStore.isVerified ? 'Terverifikasi' : 'Belum Terverifikasi' }}
+            </v-chip>
+            
+            <div v-if="!verifikasiStore.isVerified" class="mt-4">
+              <p class="text-body-2 text-disabled mb-3">
+                Verifikasi diperlukan untuk dapat mengedit profil
+              </p>
+              <v-btn 
+                color="primary"
+                variant="flat"
+                size="small"
+                rounded="md"
+                @click="$router.push('/verifikasi')"
+              >
+                <v-icon start>mdi-shield-check</v-icon>
+                Verifikasi Sekarang
+              </v-btn>
+            </div>
           </v-card-text>
         </v-card>
       </v-card>
     </v-col>
+
     <v-col cols="12" md="8">
       <v-card variant="flat" rounded="lg">
         <v-card variant="outlined" rounded="lg">
           <div class="px-5 py-6">
             <h5 class="text-subtitle-1 mb-0">Edit Detail Akun</h5>
+            <p class="text-caption text-disabled mt-1">
+              {{ verifikasiStore.isVerified ? 'Perbarui informasi profil Anda' : 'Verifikasi akun terlebih dahulu untuk mengedit profil' }}
+            </p>
           </div>
           <v-divider></v-divider>
           <v-card-text>
@@ -140,7 +199,8 @@ const handleUpdate = async () => {
                   density="comfortable"
                   color="primary"
                   variant="outlined"
-                  :disabled="isLoading"
+                  :disabled="isFormDisabled"
+                  :readonly="!verifikasiStore.isVerified"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
@@ -153,7 +213,9 @@ const handleUpdate = async () => {
                   density="comfortable"
                   color="primary"
                   variant="outlined"
-                  :disabled="isLoading"
+                  :disabled="isFormDisabled"
+                  :readonly="!verifikasiStore.isVerified"
+                  :messages="!verifikasiStore.isVerified ? 'Email belum terverifikasi' : 'Email sudah terverifikasi'"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
@@ -166,7 +228,8 @@ const handleUpdate = async () => {
                   density="comfortable"
                   color="primary"
                   variant="outlined"
-                  :disabled="isLoading"
+                  :disabled="isFormDisabled"
+                  :readonly="!verifikasiStore.isVerified"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
@@ -179,7 +242,8 @@ const handleUpdate = async () => {
                   density="comfortable"
                   color="primary"
                   variant="outlined"
-                  :disabled="isLoading"
+                  :disabled="isFormDisabled"
+                  :readonly="!verifikasiStore.isVerified"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
@@ -192,7 +256,8 @@ const handleUpdate = async () => {
                   density="comfortable"
                   color="primary"
                   variant="outlined"
-                  :disabled="isLoading"
+                  :disabled="isFormDisabled"
+                  :readonly="!verifikasiStore.isVerified"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -202,9 +267,11 @@ const handleUpdate = async () => {
               variant="flat"
               class="mt-5"
               :loading="isLoading"
+              :disabled="isFormDisabled"
               @click="handleUpdate"
             >
-              {{ isLoading ? 'Menyimpan...' : 'Simpan Perubahan' }}
+              <v-icon start v-if="!verifikasiStore.isVerified">mdi-lock</v-icon>
+              {{ !verifikasiStore.isVerified ? 'Perlu Verifikasi' : (isLoading ? 'Menyimpan...' : 'Simpan Perubahan') }}
             </v-btn>
           </v-card-text>
         </v-card>
