@@ -19,6 +19,11 @@ const MainRoutes = {
       meta: { roles: ['admin'] }
     },
     {
+      name: 'Karir',
+      path: '/customer/karirList',
+      component: () => import('@/views/apps/customer/karirList.vue'),
+    },
+    {
       name: 'Order Details',
       path: '/app/customer/order-details',
       component: () => import('@/views/apps/customer/order-details/OrderDetailPage.vue'),

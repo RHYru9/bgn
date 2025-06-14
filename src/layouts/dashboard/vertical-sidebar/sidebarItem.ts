@@ -34,9 +34,9 @@ const sidebarItem: menu[] = [
         to: '/customer/customerlist'
       },
       {
-        id: 'orderdetails',
-        title: 'Detail Order',
-        to: '/app/customer/order-details'
+        id: 'KarirList',
+        title: 'Karir List',
+        to: '/customer/karirList'
       }
     ]
   },

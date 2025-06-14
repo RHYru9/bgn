@@ -4,8 +4,31 @@ import { useCustomers } from '@/stores/apps/customers';
 import axios from 'axios';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
-import type { Header, Item } from 'vue3-easy-data-table';
+import type { Header } from 'vue3-easy-data-table';
 import 'vue3-easy-data-table/dist/style.css';
+
+// Define Customer interface
+interface Customer {
+  id: number;
+  nama: string;
+  email: string;
+  no_hp?: string;
+  alamat?: string;
+  kode_pos?: string;
+  role: string;
+  email_verified_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Define API Error interface
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
 
 const page = ref({ title: 'Customer list' });
 const breadcrumbs = shallowRef([
@@ -35,7 +58,7 @@ const filters = ref({
     ]
   },
   searchField: {
-    value: 'nama',
+    value: 'nama' as keyof Customer,
     options: [
       { title: 'Nama', value: 'nama' },
       { title: 'Email', value: 'email' },
@@ -198,9 +221,10 @@ const addCustomer = async () => {
         password_confirmation: ''
       };
     }
-  } catch (error: any) {
-    console.error('Error adding customer:', error);
-    error.value = error.response?.data?.message || 'Terjadi kesalahan saat menambahkan customer';
+  } catch (err: unknown) {
+    console.error('Error adding customer:', err);
+    const apiError = err as ApiError;
+    error.value = apiError.response?.data?.message || 'Terjadi kesalahan saat menambahkan customer';
   } finally {
     loading.value = false;
   }
@@ -212,7 +236,7 @@ const saveEditedCustomer = async () => {
   try {
     loading.value = true;
     error.value = '';
-    const dataToSend: any = {
+    const dataToSend: Record<string, string> = {
       nama: editCustomerData.value.nama,
       email: editCustomerData.value.email,
       no_hp: editCustomerData.value.no_hp,
@@ -227,9 +251,10 @@ const saveEditedCustomer = async () => {
     
     await store.updateCustomer(editCustomerData.value.id, dataToSend);
     editDialog.value = false;
-  } catch (error: any) {
-    console.error('Error saat update data:', error);
-    error.value = error.response?.data?.message || 'Terjadi kesalahan saat memperbarui data';
+  } catch (err: unknown) {
+    console.error('Error saat update data:', err);
+    const apiError = err as ApiError;
+    error.value = apiError.response?.data?.message || 'Terjadi kesalahan saat memperbarui data';
   } finally {
     loading.value = false;
   }
