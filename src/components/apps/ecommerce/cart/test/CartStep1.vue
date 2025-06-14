@@ -61,15 +61,15 @@ function next() {
 </script>
 
 <template>
-  <v-card class="pa-4 rounded-lg" color="#1D2630" elevation="1">
-    <v-card-title class="text-h6 text-white mb-3 px-0">Keranjang Belanja</v-card-title>
+  <!-- PERBAIKAN: Ganti color="#1D2630" dengan bg-surface yang responsif theme -->
+  <v-card class="pa-4 rounded-lg bg-surface" variant="outlined" elevation="1">
+    <v-card-title class="text-h6 mb-3 px-0">Keranjang Belanja</v-card-title>
 
     <div class="mb-4">
       <div 
         v-for="item in items" 
         :key="item.id" 
-        class="d-flex py-3 px-0"
-        style="border-bottom: 1px solid #2D3748;"
+        class="d-flex py-3 px-0 item-border"
       >
         <v-avatar rounded size="70" class="mr-3">
           <v-img 
@@ -82,10 +82,12 @@ function next() {
         
         <div class="d-flex flex-column justify-space-between flex-grow-1">
           <div>
-            <div class="text-white text-subtitle-1 font-weight-medium mb-1">
+            <!-- PERBAIKAN: Hapus text-white, biarkan mengikuti theme -->
+            <div class="text-subtitle-1 font-weight-medium mb-1">
               {{ item.barang.nama_barang }}
             </div>
-            <div class="text-grey-lighten-1 text-body-2">
+            <!-- PERBAIKAN: Ganti text-grey-lighten-1 dengan text-medium-emphasis -->
+            <div class="text-medium-emphasis text-body-2">
               {{ formatPrice(item.barang.harga_jual) }}
             </div>
           </div>
@@ -103,7 +105,8 @@ function next() {
                 <SvgSprite name="custom-line" width="16" height="16" />
               </v-btn>
               
-              <span class="mx-2 text-white text-body-1">{{ item.jumlah }}</span>
+              <!-- PERBAIKAN: Hapus text-white -->
+              <span class="mx-2 text-body-1">{{ item.jumlah }}</span>
               
               <v-btn 
                 icon 
@@ -131,9 +134,11 @@ function next() {
       </div>
     </div>
 
-    <v-divider class="my-4" color="grey-darken-3" />
+    <!-- PERBAIKAN: Ganti color="grey-darken-3" dengan class yang responsif theme -->
+    <v-divider class="my-4 border-opacity-25" />
 
-    <v-card-title class="text-h6 text-white mb-3 px-0">Alamat Pengiriman</v-card-title>
+    <!-- PERBAIKAN: Hapus text-white -->
+    <v-card-title class="text-h6 mb-3 px-0">Alamat Pengiriman</v-card-title>
 
     <v-form ref="addressForm" @submit.prevent="next">
       <v-row dense>
@@ -143,7 +148,7 @@ function next() {
             label="Nama Penerima"
             variant="outlined"
             density="compact"
-            color="blue"
+            color="primary"
             :rules="[v => !!v || 'Nama harus diisi']"
             class="rounded-lg"
             hide-details="auto"
@@ -155,7 +160,7 @@ function next() {
             label="No. HP"
             variant="outlined"
             density="compact"
-            color="blue"
+            color="primary"
             :rules="[v => !!v || 'No. HP harus diisi']"
             class="rounded-lg"
             hide-details="auto"
@@ -168,7 +173,7 @@ function next() {
             type="email"
             variant="outlined"
             density="compact"
-            color="blue"
+            color="primary"
             :rules="[
               v => !!v || 'Email harus diisi',
               v => /.+@.+\..+/.test(v) || 'Email tidak valid'
@@ -183,7 +188,7 @@ function next() {
             label="Alamat Lengkap"
             variant="outlined"
             density="compact"
-            color="blue"
+            color="primary"
             auto-grow
             rows="2"
             :rules="[v => !!v || 'Alamat harus diisi']"
@@ -197,7 +202,7 @@ function next() {
             label="Kode Pos"
             variant="outlined"
             density="compact"
-            color="blue"
+            color="primary"
             :rules="[v => !!v || 'Kode pos harus diisi']"
             class="rounded-lg"
             hide-details="auto"
@@ -208,10 +213,10 @@ function next() {
       <v-card-actions class="mt-4 px-0">
         <v-spacer />
         <v-btn 
-          color="blue" 
+          color="primary" 
           type="submit"
           :loading="loading"
-          class="px-4 py-1 rounded-lg text-white"
+          class="px-4 py-1 rounded-lg"
           size="small"
         >
           Lanjut Ke Pembayaran
@@ -224,5 +229,10 @@ function next() {
 <style scoped>
 .v-card-title {
   font-size: 1.125rem;
+}
+
+/* PERBAIKAN: Border yang responsif theme */
+.item-border {
+  border-bottom: 1px solid rgb(var(--v-border-color));
 }
 </style>

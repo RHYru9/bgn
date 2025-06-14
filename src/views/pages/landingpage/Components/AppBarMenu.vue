@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useDisplay } from 'vuetify';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
 import Logo from './LogoMain.vue';
@@ -13,7 +13,16 @@ const drawer = ref(false);
 const isMenuOpen = ref(false);
 const { ispValue } = useIspValue();
 
-const url = ref<string>(ispValue.value ? '/login?isp=1' : '/login');
+// Cek autentikasi dari localStorage
+const isAuthenticated = computed(() => {
+  return !!localStorage.getItem('token');
+});
+
+// URL untuk tombol
+const loginUrl = computed(() => ispValue.value ? '/login?isp=1' : '/login');
+const dashboardUrl = computed(() => {
+  return ispValue.value ? '/user/dashboard?isp=1' : '/user/dashboard';
+});
 
 const getFinalUrl = (item: Technology) => {
   if (item.link !== '#!' && ispValue.value) {
@@ -83,11 +92,36 @@ const getFinalUrl = (item: Technology) => {
             </v-sheet>
           </v-menu>
 
-          <v-btn variant="flat" class="font-weight-medium ms-4" height="42px" color="success" rounded="md" :href="url" target="_">
+          <!-- Tombol Masuk/Dashboard -->
+          <v-btn 
+            v-if="!isAuthenticated"
+            variant="flat" 
+            class="font-weight-medium ms-4" 
+            height="42px" 
+            color="success" 
+            rounded="md" 
+            :href="loginUrl" 
+            target="_"
+          >
             <template #prepend>
               <SvgSprite name="custom-link2" style="width: 20px; height: 20px" />
             </template>
             Masuk
+          </v-btn>
+          
+          <v-btn 
+            v-else
+            variant="flat" 
+            class="font-weight-medium ms-4" 
+            height="42px" 
+            color="primary" 
+            rounded="md" 
+            :to="dashboardUrl"
+          >
+            <template #prepend>
+              <SvgSprite name="custom-home-outline" style="width: 20px; height: 20px" />
+            </template>
+            Dashboard
           </v-btn>
         </template>
 
@@ -103,9 +137,10 @@ const getFinalUrl = (item: Technology) => {
     </v-container>
   </v-app-bar>
 
+  <!-- Mobile Navigation Drawer -->
   <v-navigation-drawer v-model="drawer" temporary location="top" style="height: 310px" floating v-if="!mdAndUp">
     <v-list>
-      <v-list-item :to="ispValue ? '/dashboard/default?isp=1' : '/dashboard/default'">
+      <v-list-item :to="dashboardUrl">
         <template #prepend>
           <SvgSprite name="custom-line" style="width: 20px; height: 20px" />
         </template>
@@ -174,14 +209,19 @@ const getFinalUrl = (item: Technology) => {
         </v-list-item-title>
       </v-list-item>
 
-      <v-list-item :href="url" target="_">
+      <!-- Tombol Masuk/Dashboard untuk mobile -->
+      <v-list-item v-if="!isAuthenticated" :href="loginUrl" target="_">
         <template #prepend>
           <SvgSprite name="custom-line" style="width: 20px; height: 20px" />
         </template>
         <v-list-item-title class="ms-3 text-h6">Masuk</v-list-item-title>
-        <template #append>
-          <v-chip color="primary" variant="flat" size="small">v1.0</v-chip>
+      </v-list-item>
+      
+      <v-list-item v-else :to="dashboardUrl">
+        <template #prepend>
+          <SvgSprite name="custom-dashboard" style="width: 20px; height: 20px" />
         </template>
+        <v-list-item-title class="ms-3 text-h6">Dashboard</v-list-item-title>
       </v-list-item>
     </v-list>
   </v-navigation-drawer>

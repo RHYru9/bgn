@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useDisplay } from 'vuetify';
-
-import SvgSprite from '@/components/shared/SvgSprite.vue';
 import { useIspValue } from '@/utils/useIspValue';
 import techData from '@/utils/techData';
 import type { Technology } from '@/types/tech-types';
 
-const { smAndUp } = useDisplay();
 
-const isMenuOpen = ref(false);
 
 const { ispValue } = useIspValue();
 
@@ -28,10 +22,10 @@ const getFinalUrl = (item: Technology) => {
         <v-col cols="12" lg="7" md="6" sm="8">
           <div class="pe-lg-4 homeContent text-center">
             <h1 class="bannerText mb-5" data-aos="fade-up" data-aos-duration="500">
-              Frontend Belum kelar, masih ke backend
+              BangunGo
             </h1>
             <p class="mb-8 text-h5 font-weight-regular" data-aos="fade-up" data-aos-duration="800">
-              Sedang Dikerjakan..
+              Solusi Lengkap Material Bangunan Berkualitas, Dari pondasi hingga finishing, kami menyediakan semua kebutuhan konstruksi Anda dengan harga terjangkau dan pelayanan terpercaya.
             </p>
           </div>
         </v-col>

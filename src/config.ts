@@ -16,7 +16,7 @@ const config: ConfigProps = {
   customizerDrawer: false,
   miniSidebar: false,
   isHorizontalLayout: false,
-  actTheme: 'dark',
+  actTheme: 'light',
   fontTheme: 'Inter-var',
   inputBg: false,
   themeContrast: false,

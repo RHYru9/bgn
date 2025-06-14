@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { keranjangService } from '@/stores/apps/keranjang/KeranjangService';
+import { useVerifikasiStore } from '@/stores/apps/sudahVerifikasi';
 
 import Appbar from '@/views/pages/landingpage/Components/AppBarMenu.vue';
 import FooterSection from '@/views/pages/landingpage/Components/FooterSection.vue';
@@ -40,11 +41,14 @@ interface CompleteCheckoutParams {
 }
 
 const router = useRouter();
+const verifikasiStore = useVerifikasiStore();
 const tab = ref('tab-1');
 const loading = ref(false);
 const orderCompleted = ref(false);
 const kodeTransaksi = ref('');
 const isLoggedIn = ref(false);
+const showVerificationAlert = ref(false);
+const showClearCartDialog = ref(false);
 
 const checkoutState = ref<CheckoutState>({
   step: 1,
@@ -62,6 +66,12 @@ const checkoutState = ref<CheckoutState>({
 });
 
 function changeTab(newTab: string) {
+  // Check verification before allowing navigation to payment steps
+  if ((newTab === 'tab-2' || newTab === 'tab-3') && !verifikasiStore.isEmailVerified) {
+    showVerificationAlert.value = true;
+    return;
+  }
+  
   tab.value = newTab;
   checkoutState.value.step = parseInt(newTab.split('-')[1]);
   saveState();
@@ -104,6 +114,42 @@ function saveState() {
   keranjangService.saveCheckoutState(checkoutState.value);
 }
 
+// Function to clear cart and checkout data from localStorage
+function clearCartAndCheckout() {
+  try {
+    // Clear checkout state
+    localStorage.removeItem('checkout_state');
+    
+    // Clear keranjang items (adjust key names based on your localStorage keys)
+    localStorage.removeItem('keranjang');
+    localStorage.removeItem('keranjangItems');
+    
+    // Reset checkout state
+    checkoutState.value = {
+      step: 1,
+      keranjangItems: [],
+      alamatPengiriman: {
+        nama: '',
+        no_hp: '',
+        email: '',
+        alamat: '',
+        kode_pos: '',
+      },
+      paymentMethod: { type: 'cod' },
+      catatanPembeli: '',
+      totalHarga: 0,
+    };
+    
+    // Navigate to empty cart
+    tab.value = 'tab-empty';
+    showClearCartDialog.value = false;
+    
+    console.log('Cart and checkout data cleared successfully');
+  } catch (error) {
+    console.error('Error clearing cart data:', error);
+  }
+}
+
 async function initializeCheckout() {
   try {
     loading.value = true;
@@ -114,6 +160,9 @@ async function initializeCheckout() {
       tab.value = 'tab-empty';
       return;
     }
+
+    // Check email verification status
+    await verifikasiStore.checkVerifikasi();
 
     const savedState = keranjangService.getCheckoutState();
 
@@ -154,6 +203,12 @@ async function initializeCheckout() {
 }
 
 async function completeCheckout({ buktiTransfer, catatan }: CompleteCheckoutParams) {
+  // Check verification before completing checkout
+  if (!verifikasiStore.isEmailVerified) {
+    showVerificationAlert.value = true;
+    return;
+  }
+
   try {
     loading.value = true;
 
@@ -185,6 +240,22 @@ async function completeCheckout({ buktiTransfer, catatan }: CompleteCheckoutPara
   }
 }
 
+function handleProceedToCheckout() {
+  if (!verifikasiStore.isEmailVerified) {
+    showVerificationAlert.value = true;
+    return;
+  }
+  changeTab('tab-2');
+}
+
+function handleProceedToPayment() {
+  if (!verifikasiStore.isEmailVerified) {
+    showVerificationAlert.value = true;
+    return;
+  }
+  changeTab('tab-3');
+}
+
 onMounted(() => {
   initializeCheckout();
 });
@@ -196,6 +267,75 @@ onMounted(() => {
     <v-container>
       <v-row>
         <v-col>
+          <!-- Verification Alert -->
+          <v-alert
+            v-model="showVerificationAlert"
+            type="warning"
+            closable
+            class="mb-4"
+            variant="tonal"
+          >
+            <template #title>
+              Akun Belum Diverifikasi
+            </template>
+            <template #text>
+              Akun Anda belum diverifikasi. Belum bisa untuk transaksi produk, silahkan verifikasi terlebih dahulu.
+            </template>
+            <template #append>
+              <v-btn
+                color="warning"
+                variant="outlined"
+                size="small"
+                @click="router.push('/verifikasi')"
+              >
+                Verifikasi Sekarang
+              </v-btn>
+            </template>
+          </v-alert>
+
+          <!-- Clear Cart Button - Show when there are items in cart or checkout state exists -->
+          <div v-if="checkoutState.keranjangItems.length > 0 || tab !== 'tab-empty'" class="mb-4 text-end">
+            <v-btn
+              color="error"
+              variant="outlined"
+              size="small"
+              prepend-icon="mdi-delete"
+              @click="showClearCartDialog = true"
+            >
+              Hapus Keranjang
+            </v-btn>
+          </div>
+
+          <!-- Clear Cart Confirmation Dialog -->
+          <v-dialog v-model="showClearCartDialog" max-width="400">
+            <v-card>
+              <v-card-title class="text-h6">
+                Hapus Keranjang
+              </v-card-title>
+              <v-card-text>
+                Apakah Anda yakin ingin menghapus semua data keranjang dan checkout? 
+                Tindakan ini tidak dapat dibatalkan.
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="grey"
+                  variant="text"
+                  @click="showClearCartDialog = false"
+                >
+                  Batal
+                </v-btn>
+                <v-btn
+                  color="error"
+                  variant="flat"
+                  @click="clearCartAndCheckout"
+                >
+                  Hapus
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
           <!-- Loading -->
           <template v-if="loading">
             <v-card variant="outlined" class="bg-surface" rounded="lg">
@@ -225,11 +365,17 @@ onMounted(() => {
                     <v-avatar size="24" color="primary" variant="tonal" class="me-2">1</v-avatar>
                     Keranjang & Alamat
                   </v-tab>
-                  <v-tab value="tab-2" :disabled="checkoutState.keranjangItems.length < 1">
+                  <v-tab 
+                    value="tab-2" 
+                    :disabled="checkoutState.keranjangItems.length < 1 || !verifikasiStore.isEmailVerified"
+                  >
                     <v-avatar size="24" color="primary" variant="tonal" class="me-2">2</v-avatar>
                     Informasi Pengiriman
                   </v-tab>
-                  <v-tab value="tab-3" :disabled="checkoutState.keranjangItems.length < 1">
+                  <v-tab 
+                    value="tab-3" 
+                    :disabled="checkoutState.keranjangItems.length < 1 || !verifikasiStore.isEmailVerified"
+                  >
                     <v-avatar size="24" color="primary" variant="tonal" class="me-2">3</v-avatar>
                     Pembayaran
                   </v-tab>
@@ -251,7 +397,7 @@ onMounted(() => {
                       :address="checkoutState.alamatPengiriman"
                       @update-address="updateAddress"
                       @update-items="updateItems"
-                      @next="changeTab('tab-2')"
+                      @next="handleProceedToCheckout"
                     />
                   </v-col>
                   <v-col md="4" cols="12">
@@ -261,11 +407,24 @@ onMounted(() => {
                       class="mt-4"
                       block
                       rounded="md"
-                      @click="changeTab('tab-2')"
+                      @click="handleProceedToCheckout"
                       :disabled="checkoutState.keranjangItems.length < 1"
                     >
                       Proses ke Checkout
                     </v-btn>
+                    
+                    <!-- Verification warning for unverified users -->
+                    <v-alert
+                      v-if="!verifikasiStore.isEmailVerified && isLoggedIn"
+                      type="warning"
+                      variant="tonal"
+                      class="mt-3"
+                      density="compact"
+                    >
+                      <template #text>
+                        <small>Verifikasi email diperlukan untuk melanjutkan checkout</small>
+                      </template>
+                    </v-alert>
                   </v-col>
                 </v-row>
                 <div v-else class="d-flex justify-center">
@@ -296,7 +455,7 @@ onMounted(() => {
                       block
                       rounded="md"
                       class="mt-6"
-                      @click="changeTab('tab-3')"
+                      @click="handleProceedToPayment"
                     >
                       Proses ke Pembayaran
                     </v-btn>

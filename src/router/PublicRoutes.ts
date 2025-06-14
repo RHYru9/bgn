@@ -98,7 +98,7 @@ const PublicRoutes = {
     {
       name: 'Kontak Kami',
       path: '/kontak',
-      component: () => import('@/views/pages/landingpage/Components/Kontak.vue')
+      component: () => import('@/views/pages/landingpage/Components/KontakForm.vue')
     },
     {
       name: 'Dukungan Teknis',

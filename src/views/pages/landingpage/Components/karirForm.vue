@@ -4,6 +4,7 @@ import Appbar from './AppBarMenu.vue';
 import FooterSection from './FooterSection.vue';
 import NewsLetter from './NewsLetter.vue';
 import { useCustomizerStore } from '@/stores/customizer';
+import SvgSprite from '@/components/shared/SvgSprite.vue';
 
 const customizer = useCustomizerStore();
 const formType = ref('pelamar');
@@ -40,6 +41,20 @@ const jenisMitraOptions = [
   'Lainnya'
 ];
 
+// Validation rules
+const rules = {
+  required: (value: string) => !!value || 'Wajib diisi.',
+  email: (value: string) => {
+    const pattern = /^(([^<>()[\]\\.,;:\s@"]+(.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return pattern.test(value) || 'Email tidak valid.';
+  },
+  url: (value: string) => {
+    if (!value) return true;
+    const pattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+    return pattern.test(value) || 'URL tidak valid';
+  }
+};
+
 const submitForm = async () => {
   isLoading.value = true;
   successMessage.value = '';
@@ -62,28 +77,7 @@ const submitForm = async () => {
     
     if (response.ok) {
       successMessage.value = 'Data berhasil dikirim!';
-      // Reset form
-      if (formType.value === 'pelamar') {
-        pelamarForm.value = {
-          nama_lengkap: '',
-          nama_panggilan: '',
-          email: '',
-          link_ijazah: '',
-          link_ktp: '',
-          link_cv: ''
-        };
-      } else {
-        mitraForm.value = {
-          nama_lengkap: '',
-          nama_perusahaan: '',
-          email_perusahaan: '',
-          nomor_telepon: '',
-          alamat: '',
-          jenis_mitra: '',
-          status: 'aktif',
-          deskripsi: ''
-        };
-      }
+      resetForm();
     } else {
       errorMessage.value = data.message || 'Terjadi kesalahan saat mengirim data';
     }
@@ -117,13 +111,11 @@ const resetForm = () => {
       deskripsi: ''
     };
   }
-  successMessage.value = '';
-  errorMessage.value = '';
 };
 </script>
 
 <template>
-    <Appbar />
+  <Appbar />
   <v-layout class="flex-column" :class="customizer.actTheme === 'dark' ? 'bg-containerBg' : 'bg-surface'">
     <v-main class="bg-surface pt-appbar">
       <v-container class="py-16">
@@ -162,7 +154,7 @@ const resetForm = () => {
         <!-- Form Container -->
         <v-row class="justify-center">
           <v-col cols="12" md="8">
-            <v-card elevation="1" class="pa-6 rounded-xl shadow-lg">
+            <v-card elevation="1" class="pa-6 rounded-xl">
               <!-- Success Message -->
               <v-alert
                 v-if="successMessage"
@@ -183,27 +175,34 @@ const resetForm = () => {
                 {{ errorMessage }}
               </v-alert>
 
-              <!-- Pelamar -->
+              <!-- Pelamar Form -->
               <v-form v-if="formType === 'pelamar'" @submit.prevent="submitForm">
                 <h2 class="text-h4 mb-6 text-primary">Formulir Pelamar</h2>
                 
-                <v-row>
+                <v-row class="mb-4">
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="pelamarForm.nama_lengkap"
                       label="Nama Lengkap"
-                      required
-                      outlined
-                      class="mb-4"
-                      :rules="[v => !!v || 'Nama lengkap wajib diisi']"
-                    ></v-text-field>
+                      variant="outlined"
+                      color="primary"
+                      :rules="[rules.required]"
+                      persistent-placeholder
+                      density="comfortable"
+                    >
+                      <template v-slot:prepend-inner>
+                        <SvgSprite name="custom-user" style="width: 20px; height: 20px" />
+                      </template>
+                    </v-text-field>
                   </v-col>
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="pelamarForm.nama_panggilan"
                       label="Nama Panggilan"
-                      outlined
-                      class="mb-4"
+                      variant="outlined"
+                      color="primary"
+                      persistent-placeholder
+                      density="comfortable"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -212,49 +211,77 @@ const resetForm = () => {
                   v-model="pelamarForm.email"
                   label="Email"
                   type="email"
-                  required
-                  outlined
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.required, rules.email]"
+                  persistent-placeholder
+                  density="comfortable"
                   class="mb-4"
-                  :rules="[
-                    v => !!v || 'Email wajib diisi',
-                    v => /.+@.+\..+/.test(v) || 'Email harus valid'
-                  ]"
-                ></v-text-field>
+                >
+                  <template v-slot:prepend-inner>
+                    <SvgSprite name="custom-mail-outline" style="width: 20px; height: 20px" />
+                  </template>
+                </v-text-field>
 
                 <v-text-field
                   v-model="pelamarForm.link_ijazah"
                   label="Link Ijazah (URL)"
-                  outlined
-                  class="mb-4"
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.url]"
+                  persistent-placeholder
                   hint="Upload ijazah Anda ke layanan cloud dan masukkan link-nya di sini"
                   persistent-hint
-                ></v-text-field>
+                  density="comfortable"
+                  class="mb-4"
+                >
+                  <template v-slot:prepend-inner>
+                    <SvgSprite name="custom-link" style="width: 20px; height: 20px" />
+                  </template>
+                </v-text-field>
 
                 <v-text-field
                   v-model="pelamarForm.link_ktp"
                   label="Link KTP (URL)"
-                  outlined
-                  class="mb-4"
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.url]"
+                  persistent-placeholder
                   hint="Upload scan KTP Anda ke layanan cloud dan masukkan link-nya di sini"
                   persistent-hint
-                ></v-text-field>
+                  density="comfortable"
+                  class="mb-4"
+                >
+                  <template v-slot:prepend-inner>
+                    <SvgSprite name="custom-id-card" style="width: 20px; height: 20px" />
+                  </template>
+                </v-text-field>
 
                 <v-text-field
                   v-model="pelamarForm.link_cv"
                   label="Link CV (URL)"
-                  required
-                  outlined
-                  class="mb-4"
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.required, rules.url]"
+                  persistent-placeholder
                   hint="Upload CV Anda ke layanan cloud dan masukkan link-nya di sini"
                   persistent-hint
-                  :rules="[v => !!v || 'Link CV wajib diisi']"
-                ></v-text-field>
+                  required
+                  density="comfortable"
+                  class="mb-4"
+                >
+                  <template v-slot:prepend-inner>
+                    <SvgSprite name="custom-document" style="width: 20px; height: 20px" />
+                  </template>
+                </v-text-field>
 
                 <div class="d-flex justify-end gap-4 mt-6">
                   <v-btn
                     color="error"
                     variant="outlined"
                     @click="resetForm"
+                    size="large"
+                    rounded="md"
                   >
                     Reset
                   </v-btn>
@@ -262,6 +289,8 @@ const resetForm = () => {
                     color="primary"
                     type="submit"
                     :loading="isLoading"
+                    size="large"
+                    rounded="md"
                   >
                     Kirim Lamaran
                   </v-btn>
@@ -275,62 +304,91 @@ const resetForm = () => {
                 <v-text-field
                   v-model="mitraForm.nama_lengkap"
                   label="Nama Lengkap"
-                  required
-                  outlined
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.required]"
+                  persistent-placeholder
+                  density="comfortable"
                   class="mb-4"
-                  :rules="[v => !!v || 'Nama lengkap wajib diisi']"
-                ></v-text-field>
+                >
+                  <template v-slot:prepend-inner>
+                    <SvgSprite name="custom-user" style="width: 20px; height: 20px" />
+                  </template>
+                </v-text-field>
 
                 <v-text-field
                   v-model="mitraForm.nama_perusahaan"
                   label="Nama Perusahaan"
-                  required
-                  outlined
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.required]"
+                  persistent-placeholder
+                  density="comfortable"
                   class="mb-4"
-                  :rules="[v => !!v || 'Nama perusahaan wajib diisi']"
-                ></v-text-field>
+                >
+                  <template v-slot:prepend-inner>
+                    <SvgSprite name="custom-building" style="width: 20px; height: 20px" />
+                  </template>
+                </v-text-field>
 
                 <v-text-field
                   v-model="mitraForm.email_perusahaan"
                   label="Email Perusahaan"
-                  type="email"
-                  required
-                  outlined
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.required, rules.email]"
+                  persistent-placeholder
+                  density="comfortable"
                   class="mb-4"
-                  :rules="[
-                    v => !!v || 'Email perusahaan wajib diisi',
-                    v => /.+@.+\..+/.test(v) || 'Email harus valid'
-                  ]"
-                ></v-text-field>
+                >
+                  <template v-slot:prepend-inner>
+                    <SvgSprite name="custom-mail-outline" style="width: 20px; height: 20px" />
+                  </template>
+                </v-text-field>
 
                 <v-text-field
                   v-model="mitraForm.nomor_telepon"
                   label="Nomor Telepon"
-                  required
-                  outlined
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.required]"
+                  persistent-placeholder
+                  density="comfortable"
                   class="mb-4"
-                  :rules="[v => !!v || 'Nomor telepon wajib diisi']"
-                ></v-text-field>
+                >
+                  <template v-slot:prepend-inner>
+                    <SvgSprite name="custom-phone" style="width: 20px; height: 20px" />
+                  </template>
+                </v-text-field>
 
                 <v-textarea
                   v-model="mitraForm.alamat"
                   label="Alamat"
-                  required
-                  outlined
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.required]"
+                  persistent-placeholder
                   rows="2"
+                  auto-grow
+                  density="comfortable"
                   class="mb-4"
-                  :rules="[v => !!v || 'Alamat wajib diisi']"
                 ></v-textarea>
 
                 <v-select
                   v-model="mitraForm.jenis_mitra"
                   :items="jenisMitraOptions"
                   label="Jenis Mitra"
-                  required
-                  outlined
+                  variant="outlined"
+                  color="primary"
+                  :rules="[rules.required]"
+                  persistent-placeholder
+                  density="comfortable"
                   class="mb-4"
-                  :rules="[v => !!v || 'Jenis mitra wajib dipilih']"
-                ></v-select>
+                >
+                  <template v-slot:prepend-inner>
+                    <SvgSprite name="custom-category" style="width: 20px; height: 20px" />
+                  </template>
+                </v-select>
 
                 <v-radio-group
                   v-model="mitraForm.status"
@@ -338,18 +396,22 @@ const resetForm = () => {
                   inline
                   class="mb-4"
                 >
-                  <v-radio label="Aktif" value="aktif"></v-radio>
-                  <v-radio label="Non-Aktif" value="non-aktif"></v-radio>
+                  <v-radio label="Aktif" value="aktif" color="primary"></v-radio>
+                  <v-radio label="Non-Aktif" value="non-aktif" color="primary"></v-radio>
                 </v-radio-group>
 
                 <v-textarea
                   v-model="mitraForm.deskripsi"
                   label="Deskripsi Perusahaan"
-                  outlined
+                  variant="outlined"
+                  color="primary"
+                  persistent-placeholder
                   rows="3"
-                  class="mb-4"
+                  auto-grow
                   hint="Deskripsi singkat tentang perusahaan Anda"
                   persistent-hint
+                  density="comfortable"
+                  class="mb-4"
                 ></v-textarea>
 
                 <div class="d-flex justify-end gap-4 mt-6">
@@ -357,6 +419,8 @@ const resetForm = () => {
                     color="error"
                     variant="outlined"
                     @click="resetForm"
+                    size="large"
+                    rounded="md"
                   >
                     Reset
                   </v-btn>
@@ -364,6 +428,8 @@ const resetForm = () => {
                     color="primary"
                     type="submit"
                     :loading="isLoading"
+                    size="large"
+                    rounded="md"
                   >
                     Daftar Sebagai Mitra
                   </v-btn>
@@ -392,7 +458,7 @@ const resetForm = () => {
       </v-container>
     </v-main>
   </v-layout>
-      <NewsLetter />
+  <NewsLetter />
   <FooterSection />
 </template>
 
@@ -400,27 +466,46 @@ const resetForm = () => {
 .pt-appbar {
   padding-top: 40px;
 }
-/* Custom styling for the form */
+
+/* Form spacing */
+.v-text-field,
+.v-textarea,
+.v-select {
+  margin-bottom: 16px;
+}
+
+.v-input__details {
+  margin-top: 4px;
+}
+
+/* Card styling */
 .v-card {
   background-color: var(--v-theme-surface);
   transition: all 0.3s ease;
 }
 
+/* Text styling */
 .text-primary {
   color: rgb(var(--v-theme-primary)) !important;
-}
-
-/* Form input styling */
-.v-text-field,
-.v-textarea,
-.v-select {
-  background-color: var(--v-theme-background) !important;
 }
 
 /* Button styling */
 .v-btn {
   font-weight: 600;
   letter-spacing: 0.5px;
+  text-transform: none;
+}
+
+/* Form field styling */
+.v-field--variant-outlined .v-field__outline {
+  border-width: 1px;
+}
+
+.v-field--variant-outlined .v-field__outline__start,
+.v-field--variant-outlined .v-field__outline__notch::before,
+.v-field--variant-outlined .v-field__outline__notch::after,
+.v-field--variant-outlined .v-field__outline__end {
+  border-width: 1px;
 }
 
 /* Responsive adjustments */
@@ -431,13 +516,47 @@ const resetForm = () => {
   }
 }
 
-/* Animation for form switch */
-.v-form {
-  transition: opacity 0.3s ease;
-}
-
 /* Gap utility for buttons */
 .gap-4 {
   gap: 16px;
+}
+
+/* Custom spacing for form elements */
+.mb-4 {
+  margin-bottom: 16px !important;
+}
+
+.mb-6 {
+  margin-bottom: 24px !important;
+}
+
+.mt-4 {
+  margin-top: 16px !important;
+}
+
+.mt-6 {
+  margin-top: 24px !important;
+}
+
+/* Custom styling for form fields */
+.v-input__prepend-inner {
+  margin-right: 12px;
+  align-self: center;
+}
+
+/* Hint text styling */
+.v-messages__message {
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+/* Radio group styling */
+.v-radio-group {
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.v-radio {
+  margin-right: 16px;
 }
 </style>
